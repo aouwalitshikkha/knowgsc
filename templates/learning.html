@@ -1,0 +1,153 @@
+<!-- ============================================================
+{% extends "base.html" %}
+{% block content %}
+
+  KNOWGSC — LEARNING ROADMAP
+  Extends: base.html (shared header / footer / Tailwind shell)
+  ============================================================ -->
+
+<main class="min-h-screen bg-gray-50">
+
+  <!-- ================= HEADER ================= -->
+  <section class="border-b border-gray-200 bg-white">
+    <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <a href="/" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">← Back to Home</a>
+          <h1 class="mt-1 text-xl font-bold text-gray-900">Learning Roadmap</h1>
+          <p class="text-sm text-gray-500">Teach GSC and technical SEO through practical competencies</p>
+        </div>
+        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-200">
+          Progress tracked
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ROADMAP PATH ================= -->
+  <section class="py-8 sm:py-12">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+      <!-- Current recommended path -->
+      <div class="rounded-2xl bg-indigo-600 p-6 text-white shadow-sm sm:p-8">
+        <p class="text-xs font-bold uppercase tracking-wide text-indigo-200">Your current recommended path</p>
+        <h2 class="mt-2 text-2xl font-bold">GSC Fundamentals → Indexing Diagnostics → Technical SEO</h2>
+        <p class="mt-2 max-w-2xl text-sm text-indigo-100">
+          Based on weaknesses observed during your diagnostic sessions, the roadmap recommends
+          starting at Level 1 before advancing.
+        </p>
+        <a href="#level-1" class="mt-5 inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">
+          Start Level 1 — GSC Fundamentals
+        </a>
+      </div>
+
+      <!-- Levels -->
+      <div class="mt-10 space-y-8">
+
+        <!-- Level 1 -->
+        <div id="level-1" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-lg font-bold text-white">1</span>
+              <div>
+                <h3 class="text-lg font-bold text-gray-900">Level 1 — GSC Fundamentals</h3>
+                <p class="text-sm text-gray-600">Understand reports and indexing terminology</p>
+              </div>
+            </div>
+            <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-200">Completed</span>
+          </div>
+          <div class="mt-4 grid gap-2 md:grid-cols-2">
+            <div class="rounded-lg border border-gray-200 p-3">
+              <p class="text-sm font-semibold text-gray-900">Lesson: GSC reports overview</p>
+              <p class="text-xs text-gray-600">Learn what each GSC report measures.</p>
+            </div>
+            <div class="rounded-lg border border-gray-200 p-3">
+              <p class="text-sm font-semibold text-gray-900">Lesson: Indexing terminology</p>
+              <p class="text-xs text-gray-600">Discovered, Crawled, Indexed, Excluded.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Level 2 -->
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-lg font-bold text-white">2</span>
+              <div>
+                <h3 class="text-lg font-bold text-gray-900">Level 2 — Indexing Diagnostics</h3>
+                <p class="text-sm text-gray-600">Investigate common indexing exclusions</p>
+              </div>
+            </div>
+            <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 ring-1 ring-inset ring-amber-200">In progress</span>
+          </div>
+          <div class="mt-4 grid gap-2 md:grid-cols-2">
+            <div class="rounded-lg border border-gray-200 p-3">
+              <p class="text-sm font-semibold text-gray-900">Lesson: Discovered – currently not indexed</p>
+              <p class="text-xs text-gray-600">Walk through sitemap, internal linking, and HTTP checks.</p>
+            </div>
+            <div class="rounded-lg border border-gray-200 p-3">
+              <p class="text-sm font-semibold text-gray-900">Lesson: Crawled – currently not indexed</p>
+              <p class="text-xs text-gray-600">Investigate crawl eligibility and directives.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Level 3 -->
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-lg font-bold text-white">3</span>
+              <div>
+                <h3 class="text-lg font-bold text-gray-900">Level 3 — Technical SEO</h3>
+                <p class="text-sm text-gray-600">Analyze HTTP, crawling, rendering, and server behavior</p>
+              </div>
+            </div>
+            <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-300">Not started</span>
+          </div>
+          <div class="mt-4 grid gap-2 md:grid-cols-2">
+            <div class="rounded-lg border border-gray-200 p-3">
+              <p class="text-sm font-semibold text-gray-900">Lesson: HTTP status codes &amp; server errors</p>
+              <p class="text-xs text-gray-600">5xx, redirects, timeouts, and log analysis.</p>
+            </div>
+            <div class="rounded-lg border border-gray-200 p-3">
+              <p class="text-sm font-semibold text-gray-900">Lesson: Rendering &amp; JavaScript</p>
+              <p class="text-xs text-gray-600">Crawl accessibility and rendered content.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Level 4 -->
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-lg font-bold text-white">4</span>
+              <div>
+                <h3 class="text-lg font-bold text-gray-900">Level 4 — Search Performance</h3>
+                <p class="text-sm text-gray-600">Investigate traffic and ranking changes</p>
+              </div>
+            </div>
+            <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-300">Not started</span>
+          </div>
+        </div>
+
+        <!-- Level 5 -->
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-lg font-bold text-white">5</span>
+              <div>
+                <h3 class="text-lg font-bold text-gray-900">Level 5 — Advanced SEO</h3>
+                <p class="text-sm text-gray-600">Handle large-scale and complex technical cases</p>
+              </div>
+            </div>
+            <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-300">Not started</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+{% endblock %}
