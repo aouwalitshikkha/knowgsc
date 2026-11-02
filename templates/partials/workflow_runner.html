@@ -1,0 +1,695 @@
+  <!-- Stepper (compact) -->
+  <section class="border-b border-slate-200 bg-white">
+    <div class="container-page py-4">
+      <ol id="stepper" class="scroll-area flex items-center gap-2 overflow-x-auto pb-1" aria-label="Workflow steps">
+        <!-- filled by JS -->
+      </ol>
+    </div>
+  </section>
+
+  <!-- Diagnostic session -->
+  <section class="section pt-8">
+    <div class="container-page">
+      <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+
+        <!-- Current step -->
+        <div id="question-panel" class="card p-6 sm:p-8">
+          <!-- rendered by JS -->
+        </div>
+
+        <!-- Evidence sidebar -->
+        <aside class="space-y-5 lg:sticky lg:top-24">
+          <div class="card p-5">
+            <div class="flex items-center justify-between">
+              <h2 class="text-sm font-semibold text-slate-900">Evidence collected</h2>
+              <span id="evidence-count" class="chip-neutral">0 items</span>
+            </div>
+            <p class="mt-1 text-xs text-slate-500">User-reported evidence is kept separate from verified evidence.</p>
+
+            <ul id="user-evidence-list" class="mt-4 space-y-2">
+              <li class="rounded-lg border border-dashed border-slate-200 p-3 text-xs text-slate-400">
+                No answers recorded yet.
+              </li>
+            </ul>
+
+            <div class="mt-5 border-t border-slate-200 pt-4">
+              <div class="flex items-center justify-between">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Verified evidence</p>
+                <span id="verified-count" class="text-[11px] font-semibold text-slate-400">0</span>
+              </div>
+              <p id="verified-empty" class="mt-2 text-xs leading-relaxed text-slate-400">
+                Nothing verified yet. Verified evidence appears after you re-run checks and record actual results.
+              </p>
+              <ul id="verified-list" class="mt-2 space-y-1.5"></ul>
+            </div>
+          </div>
+
+          <div class="card p-5">
+            <h2 class="text-sm font-semibold text-slate-900">Need help answering?</h2>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button type="button" class="support-action chip-brand transition hover:bg-brand-100" data-action="dont-know">I don't know</button>
+              <button type="button" class="support-action chip-brand transition hover:bg-brand-100" data-action="skip">Skip this question</button>
+              <button type="button" class="support-action chip-brand transition hover:bg-brand-100" data-action="how-to-check">Show me how to check</button>
+              <button type="button" class="support-action chip-brand transition hover:bg-brand-100" data-action="own-answer">Type my own answer</button>
+              <button type="button" class="support-action chip-brand transition hover:bg-brand-100" data-action="upload">Upload evidence</button>
+              <button type="button" class="support-action chip-brand transition hover:bg-brand-100" data-action="previous">Return to previous answer</button>
+            </div>
+            <p class="mt-3 text-[11px] leading-relaxed text-slate-400">
+              You never have to guess. Unknown answers are recorded as unknown, not as evidence.
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <p class="text-xs font-semibold text-amber-900">Hypotheses stay hypotheses</p>
+            <p class="mt-1 text-xs leading-relaxed text-amber-900/80">
+              KnowGSC will not claim a cause is confirmed until the corresponding evidence has actually been verified.
+            </p>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+{{ engine|json_script:"workflow-engine" }}
+
+<script>
+  // ================= DIAGNOSTIC ENGINE =================
+  const engineData = JSON.parse(document.getElementById('workflow-engine').textContent);
+  const flow = engineData.nodes || [];
+  const questions = flow.filter((node) => node.type === 'question');
+  const nodeById = new Map(flow.map((node) => [node.id, node]));
+
+  if (!flow.length) {
+    document.getElementById('question-panel').innerHTML = `
+      <div class="rounded-xl border border-dashed border-slate-300 p-8 text-center">
+        <p class="text-sm font-semibold text-slate-900">No published workflow yet</p>
+        <p class="mt-1 text-sm text-slate-500">Add a workflow in the admin to start diagnosing.</p>
+      </div>
+    `;
+  }
+
+  const state = {
+    index: 0,
+    path: flow.length ? [flow[0].id] : [],
+    answers: {},
+    skipped: {},
+    verified: {},
+    selected: null,
+    saveLabel: '',
+    timer: null
+  };
+
+  const els = {
+    panel: document.getElementById('question-panel'),
+    stepper: document.getElementById('stepper'),
+    evidenceList: document.getElementById('user-evidence-list'),
+    evidenceCount: document.getElementById('evidence-count'),
+    verifiedList: document.getElementById('verified-list'),
+    verifiedEmpty: document.getElementById('verified-empty'),
+    verifiedCount: document.getElementById('verified-count'),
+    progressBar: document.getElementById('progress-bar'),
+    progressFill: document.getElementById('progress-fill'),
+    progressPercent: document.getElementById('progress-percent'),
+    progressLabel: document.getElementById('progress-label'),
+    status: document.getElementById('session-status'),
+    problemLabel: document.getElementById('problem-label'),
+    saveStatus: document.getElementById('save-status')
+  };
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  // ---------- adaptive routing ----------
+  function goToNode(node) {
+    if (!node) return;
+    const index = flow.indexOf(node);
+    if (index >= 0) state.index = index;
+  }
+
+  function nextNodeFor(node) {
+    if (!node) return null;
+    const answer = state.answers[node.id];
+    const option = (node.options || []).find((item) => item.label === answer);
+    const target = (option && option.next) || node.next;
+    if (target && nodeById.has(target)) return nodeById.get(target);
+    const index = flow.indexOf(node);
+    return flow[index + 1] || null;
+  }
+
+  function advanceFrom(node) {
+    const next = nextNodeFor(node);
+    const currentPos = state.path.lastIndexOf(node.id);
+    if (currentPos === -1) {
+      state.path.push(node.id);
+    } else {
+      state.path = state.path.slice(0, currentPos + 1);
+    }
+    if (!next) return false;
+    if (state.path[state.path.length - 1] !== next.id) {
+      state.path.push(next.id);
+    }
+    goToNode(next);
+    return true;
+  }
+
+  function goBack() {
+    if (state.path.length <= 1) return;
+    state.path.pop();
+    const previous = nodeById.get(state.path[state.path.length - 1]);
+    if (previous) goToNode(previous);
+  }
+
+  function answeredCount() {
+    return Object.keys(state.answers).length;
+  }
+
+  // ---------- session persistence ----------
+  function getCsrf() {
+    const match = document.cookie.split('; ').find((row) => row.startsWith('csrftoken='));
+    return match ? match.split('=')[1] : '';
+  }
+
+  async function persistState() {
+    if (!state.answers || Object.keys(state.answers).length === 0) return;
+
+    const node = flow[state.index];
+    const completed = node && node.type === 'verify'
+      && Object.values(state.verified).some(Boolean)
+      && Object.keys(state.answers).every((key) => state.verified[key]);
+
+    const payload = {
+      workflow_slug: engineData.workflow.slug,
+      state: {
+        index: state.index,
+        path: state.path,
+        answers: state.answers,
+        skipped: state.skipped,
+        verified: state.verified
+      },
+      status: completed ? 'completed' : 'in_progress'
+    };
+
+    try {
+      if (!state.token) {
+        const res = await fetch('/api/sessions/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.token) state.token = data.token;
+      } else {
+        await fetch('/api/sessions/' + state.token + '/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+          body: JSON.stringify(payload)
+        });
+      }
+      els.saveStatus.textContent = 'Session saved';
+    } catch (error) {
+      els.saveStatus.textContent = 'Session not saved';
+    }
+  }
+
+  function scheduleSave() {
+    clearTimeout(state.timer);
+    state.timer = setTimeout(persistState, 400);
+  }
+
+  // ---------- progress + stepper ----------
+  function renderProgress() {
+    const node = flow[state.index];
+    const questionSteps = state.path.filter((id) => {
+      const item = nodeById.get(id);
+      return item && item.type === 'question';
+    }).length;
+    const pct = !node
+      ? 0
+      : node.type === 'question'
+        ? Math.min(95, Math.max(10, questionSteps * 20))
+        : 100;
+
+    els.progressFill.style.width = pct + '%';
+    els.progressPercent.textContent = pct + '%';
+    els.progressBar.setAttribute('aria-valuenow', String(pct));
+
+    if (node && node.type === 'question') {
+      els.progressLabel.textContent = `Step ${questionSteps}`;
+    } else if (node && node.type === 'findings') {
+      els.progressLabel.textContent = 'Findings';
+    } else {
+      els.progressLabel.textContent = 'Verification';
+    }
+
+    const atReview = node && (node.type === 'findings' || node.type === 'verify');
+    if (atReview) {
+      els.status.textContent = 'Session status: Evidence review';
+      els.status.className = 'chip-ok';
+    } else {
+      els.status.textContent = 'Session status: In progress';
+      els.status.className = 'chip-warn';
+    }
+
+    // Only show the path the user actually took, not every possible branch.
+    els.stepper.innerHTML = state.path.map((id, i) => {
+      const n = nodeById.get(id);
+      if (!n) return '';
+      const label = n.type === 'question' ? n.title : (n.type === 'findings' ? 'Findings' : 'Verify');
+      const isCurrent = i === state.path.length - 1;
+      const isDone = n.type === 'question' && state.answers[n.id] !== undefined;
+      let cls = 'chip-neutral';
+      if (isCurrent) cls = 'chip-brand ring-2 ring-brand-500/30';
+      else if (isDone) cls = 'chip-ok';
+
+      return `
+        <li class="shrink-0">
+          <span class="${cls} whitespace-nowrap">${escapeHtml(label)}</span>
+        </li>
+      `;
+    }).join('');
+  }
+
+  // ---------- evidence ----------
+  function renderEvidence() {
+    const entries = Object.entries(state.answers).filter(([k]) => !state.skipped[k]);
+
+    els.evidenceCount.textContent = `${entries.length} item${entries.length === 1 ? '' : 's'}`;
+
+    els.evidenceList.innerHTML = entries.length
+      ? entries.map(([key, value]) => {
+          const q = questions.find((n) => n.id === key);
+          const isUnknown = value === 'Not sure';
+          return `
+            <li class="rounded-lg border border-slate-200 bg-white p-3">
+              <p class="text-[11px] font-medium uppercase tracking-wide text-slate-400">${escapeHtml(q ? q.title : key)}</p>
+              <p class="mt-1 flex items-start gap-2 text-xs ${isUnknown ? 'text-slate-500' : 'text-slate-800'}">
+                <span class="${isUnknown ? 'chip-neutral' : 'chip-brand'} !px-1.5 !py-0.5">${isUnknown ? 'Unknown' : 'Reported'}</span>
+                <span>${escapeHtml(value)}</span>
+              </p>
+            </li>
+          `;
+        }).join('')
+      : `<li class="rounded-lg border border-dashed border-slate-200 p-3 text-xs text-slate-400">No answers recorded yet.</li>`;
+
+    const verifiedEntries = entries.filter(([k]) => state.verified[k]);
+    els.verifiedCount.textContent = String(verifiedEntries.length);
+    els.verifiedEmpty.classList.toggle('hidden', verifiedEntries.length > 0);
+
+    els.verifiedList.innerHTML = verifiedEntries.map(([key, value]) => `
+      <li class="flex items-start gap-2 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs text-emerald-900">
+        <svg class="mt-0.5 h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <span><strong>${escapeHtml((questions.find((n) => n.id === key) || {}).title || key)}:</strong> ${escapeHtml(value)}</span>
+      </li>
+    `).join('');
+  }
+
+  // ---------- question view ----------
+  function renderQuestion(node) {
+    const stepNumber = state.path.filter((id) => {
+      const item = nodeById.get(id);
+      return item && item.type === 'question';
+    }).length;
+    const selected = state.answers[node.id];
+    const options = node.options || [];
+    const next = nextNodeFor(node);
+    const isLast = next && next.type === 'findings';
+    const isOption = options.some((opt) => opt.label === selected);
+    const typedAnswer = selected && !isOption ? selected : '';
+
+    els.panel.innerHTML = `
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p class="eyebrow">Step ${stepNumber} · ${escapeHtml(node.title)}</p>
+          <h2 class="mt-2 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">${escapeHtml(node.question)}</h2>
+        </div>
+        <span class="chip-neutral">${options.length} options</span>
+      </div>
+
+      <div id="answer-options" class="mt-6 grid gap-2.5 sm:grid-cols-2">
+        ${options.map((opt) => {
+          const active = selected === opt.label;
+          return `
+            <button type="button"
+                    data-value="${escapeHtml(opt.label)}"
+                    class="answer-option group flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm font-medium transition
+                           ${active
+                             ? 'border-brand-500 bg-brand-50 text-brand-800 ring-2 ring-brand-500/20'
+                             : 'border-slate-300 bg-white text-slate-700 hover:border-brand-400 hover:bg-brand-50/40'}">
+              <span>${escapeHtml(opt.label)}</span>
+              <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${active ? 'border-brand-500 bg-brand-500 text-white' : 'border-slate-300 text-transparent'}">
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+            </button>
+          `;
+        }).join('')}
+      </div>
+
+      <div id="support-help" class="mt-5 hidden rounded-xl border border-brand-200 bg-brand-50/60 p-4">
+        <p class="text-xs font-semibold uppercase tracking-wide text-brand-800">How to check</p>
+        <p class="mt-1 text-sm leading-relaxed text-brand-950/80">${escapeHtml(node.hint)}</p>
+      </div>
+
+      <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+        <label for="custom-answer-input" class="text-xs font-semibold uppercase tracking-wide text-slate-500">Or type your own answer</label>
+        <p class="mt-1 text-xs text-slate-500">Use this when the options do not match what you see. Typed answers are stored as user-reported evidence.</p>
+        <textarea id="custom-answer-input" rows="2" placeholder="Describe exactly what you observed…" class="input mt-2 resize-none">${escapeHtml(typedAnswer)}</textarea>
+        <div class="mt-2 flex flex-wrap items-center gap-2">
+          <button type="button" id="save-custom-answer" class="btn-secondary btn-sm">Use typed answer</button>
+          ${typedAnswer ? `<button type="button" id="clear-custom-answer" class="btn-ghost btn-sm">Clear typed answer</button>` : ''}
+        </div>
+        ${typedAnswer ? `<p class="mt-2 text-xs text-slate-500">Current typed answer: <span class="font-medium text-slate-800">${escapeHtml(typedAnswer)}</span></p>` : ''}
+      </div>
+
+      <div class="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-5">
+        <button type="button" id="back-btn" class="btn-ghost btn-sm" ${state.path.length <= 1 ? 'disabled' : ''}>
+          <span aria-hidden="true">←</span> Back
+        </button>
+        <button type="button" id="continue-btn" class="btn-primary" ${selected ? '' : 'disabled'}>
+          ${isLast ? 'Generate findings' : 'Continue'}
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+          </svg>
+        </button>
+      </div>
+    `;
+
+    els.panel.querySelectorAll('.answer-option').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.answers[node.id] = btn.dataset.value;
+        delete state.skipped[node.id];
+        render();
+        scheduleSave();
+      });
+    });
+
+    const continueBtn = document.getElementById('continue-btn');
+    continueBtn.addEventListener('click', () => {
+      if (!state.answers[node.id]) return;
+      if (!advanceFrom(node)) return;
+      render();
+      scheduleSave();
+    });
+
+    const customInput = document.getElementById('custom-answer-input');
+    const saveCustom = document.getElementById('save-custom-answer');
+    if (saveCustom) {
+      saveCustom.addEventListener('click', () => {
+        const val = customInput.value.trim();
+        if (!val) {
+          customInput.focus();
+          return;
+        }
+        state.answers[node.id] = val;
+        delete state.skipped[node.id];
+        render();
+        scheduleSave();
+      });
+    }
+
+    if (customInput) {
+      customInput.addEventListener('keydown', (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+          event.preventDefault();
+          saveCustom.click();
+        }
+      });
+    }
+
+    const clearCustom = document.getElementById('clear-custom-answer');
+    if (clearCustom) {
+      clearCustom.addEventListener('click', () => {
+        delete state.answers[node.id];
+        render();
+        scheduleSave();
+      });
+    }
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      goBack();
+      render();
+    });
+  }
+
+  // ---------- findings view ----------
+  function renderFindings(node) {
+    const config = node.config || {};
+    const entries = Object.entries(state.answers).filter(([k]) => !state.skipped[k]);
+
+    const causes = (config.rules || [])
+      .filter((rule) => Object.entries(rule.when || {}).every(([key, value]) => state.answers[key] === value))
+      .map((rule) => rule.text);
+
+    if (!causes.length && config.fallback) causes.push(config.fallback);
+
+    els.panel.innerHTML = `
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p class="eyebrow text-emerald-600">Findings · Evidence review</p>
+          <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-900">Findings &amp; action plan</h2>
+        </div>
+        <span class="chip-ok">Evidence reviewed</span>
+      </div>
+
+      <p class="mt-3 text-sm leading-relaxed text-slate-600">${escapeHtml(config.intro || 'The workflow evaluated the collected evidence.')}</p>
+
+      <div class="mt-6 grid gap-4 sm:grid-cols-2">
+        <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+          <h3 class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Problem</h3>
+          <p class="mt-2 text-sm font-medium text-slate-900">${escapeHtml(engineData.workflow.problem)}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+          <h3 class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Evidence collected</h3>
+          <p class="mt-2 text-sm text-slate-900">${entries.length} item${entries.length === 1 ? '' : 's'} recorded</p>
+        </div>
+      </div>
+
+      <div class="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <h3 class="text-[11px] font-semibold uppercase tracking-wide text-amber-800">Potential explanations · hypotheses</h3>
+        <ul class="mt-2 space-y-1.5 text-sm text-amber-950">
+          ${causes.map((c) => `<li class="flex gap-2"><span aria-hidden="true">•</span><span>${escapeHtml(c)}</span></li>`).join('')}
+        </ul>
+      </div>
+
+      ${(config.unverified || []).length ? `
+      <div class="mt-5 rounded-xl border border-slate-200 p-4">
+        <h3 class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Still unverified</h3>
+        <ul class="mt-2 space-y-1.5 text-sm text-slate-700">
+          ${config.unverified.map((item) => `<li class="flex gap-2"><span aria-hidden="true">•</span><span>${escapeHtml(item)}</span></li>`).join('')}
+        </ul>
+      </div>` : ''}
+
+      ${(config.actions || []).length ? `
+      <div class="mt-5 rounded-xl border border-brand-200 bg-brand-50/50 p-4">
+        <h3 class="text-[11px] font-semibold uppercase tracking-wide text-brand-800">Recommended next actions</h3>
+        <ol class="mt-3 space-y-2">
+          ${config.actions.map((action, i) => `
+            <li class="flex items-start gap-3 text-sm text-slate-800">
+              <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-bold text-brand-700 ring-1 ring-brand-200">${i + 1}</span>
+              <span>${escapeHtml(action)}</span>
+            </li>
+          `).join('')}
+        </ol>
+      </div>` : ''}
+
+      <div class="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-5">
+        <button type="button" id="back-btn" class="btn-ghost btn-sm"><span aria-hidden="true">←</span> Back</button>
+        <button type="button" id="verify-btn" class="btn-primary">
+          Continue to verification
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+          </svg>
+        </button>
+      </div>
+    `;
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      goBack();
+      render();
+    });
+    document.getElementById('verify-btn').addEventListener('click', () => {
+      if (!advanceFrom(node)) return;
+      render();
+      scheduleSave();
+    });
+  }
+
+  // ---------- verification view ----------
+  function renderVerify(node) {
+    const config = node.config || {};
+    const entries = Object.entries(state.answers).filter(([k]) => !state.skipped[k]);
+    const allVerified = entries.length > 0 && entries.every(([k]) => state.verified[k]);
+
+    els.panel.innerHTML = `
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p class="eyebrow">Final step · Verification</p>
+          <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-900">Verify results</h2>
+        </div>
+        <span class="${allVerified ? 'chip-ok' : 'chip-warn'}">${allVerified ? 'Verification complete' : 'Awaiting verification'}</span>
+      </div>
+
+      <p class="mt-3 text-sm leading-relaxed text-slate-600">${escapeHtml(config.intro || 'Repeat the relevant checks and confirm what actually changed.')}</p>
+
+      <div class="mt-6 space-y-2">
+        ${entries.length ? entries.map(([key, value]) => {
+          const q = questions.find((n) => n.id === key);
+          const checked = !!state.verified[key];
+          return `
+            <label class="flex cursor-pointer items-start gap-3 rounded-xl border ${checked ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-white'} p-3.5 transition hover:border-emerald-300">
+              <input type="checkbox" class="verify-checkbox mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" data-step="${escapeHtml(key)}" ${checked ? 'checked' : ''} />
+              <span class="text-sm text-slate-700">
+                <strong class="text-slate-900">${escapeHtml(q ? q.title : key)}:</strong> ${escapeHtml(value)}
+              </span>
+            </label>
+          `;
+        }).join('') : `
+          <p class="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
+            No evidence was collected, so there is nothing to verify yet.
+          </p>
+        `}
+      </div>
+
+      ${entries.length ? `
+      <div class="mt-5 flex flex-wrap gap-2">
+        <button type="button" id="mark-all-verified" class="btn-secondary btn-sm">Mark all as verified</button>
+        <button type="button" id="reset-verified" class="btn-ghost btn-sm">Reset</button>
+      </div>` : ''}
+
+      ${allVerified ? `
+      <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+        <p class="text-sm font-semibold text-emerald-900">Verification complete</p>
+        <p class="mt-1 text-sm leading-relaxed text-emerald-900/80">${escapeHtml(config.completed || 'Every recorded item has been re-checked.')}</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button type="button" id="view-report-btn" class="btn-primary btn-sm">Save and view report</button>
+          <a href="{% url 'workflows' %}" class="btn-secondary btn-sm">Browse more workflows</a>
+          <a href="{% url 'learning' %}" class="btn-secondary btn-sm">Learn the underlying concept</a>
+        </div>
+      </div>` : ''}
+
+      <div class="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-5">
+        <button type="button" id="back-btn" class="btn-ghost btn-sm"><span aria-hidden="true">←</span> Back to findings</button>
+        <a href="{% url 'ask' %}" class="btn-secondary btn-sm">Ask a follow-up question</a>
+      </div>
+    `;
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      goBack();
+      render();
+    });
+
+    els.panel.querySelectorAll('.verify-checkbox').forEach((cb) => {
+      cb.addEventListener('change', () => {
+        state.verified[cb.dataset.step] = cb.checked;
+        render();
+        scheduleSave();
+      });
+    });
+
+    const markAll = document.getElementById('mark-all-verified');
+    if (markAll) {
+      markAll.addEventListener('click', () => {
+        entries.forEach(([k]) => { state.verified[k] = true; });
+        render();
+        scheduleSave();
+      });
+    }
+
+    const reset = document.getElementById('reset-verified');
+    if (reset) {
+      reset.addEventListener('click', () => {
+        state.verified = {};
+        render();
+        scheduleSave();
+      });
+    }
+
+    const viewReport = document.getElementById('view-report-btn');
+    if (viewReport) {
+      viewReport.addEventListener('click', async () => {
+        viewReport.disabled = true;
+        els.saveStatus.textContent = 'Saving report…';
+        await persistState();
+        if (state.token) {
+          window.location.href = '/problem-solver/report/' + state.token + '/';
+          return;
+        }
+        viewReport.disabled = false;
+        els.saveStatus.textContent = 'Report could not be saved';
+      });
+    }
+  }
+
+  // ---------- support actions ----------
+  function bindSupportActions() {
+    document.querySelectorAll('.support-action').forEach((btn) => {
+      btn.onclick = () => {
+        const node = flow[state.index];
+        const action = btn.dataset.action;
+        if (!node || node.type !== 'question') return;
+
+        if (action === 'dont-know') {
+          state.answers[node.id] = 'Not sure';
+          delete state.skipped[node.id];
+          render();
+          scheduleSave();
+
+        } else if (action === 'skip') {
+          state.skipped[node.id] = true;
+          delete state.answers[node.id];
+          delete state.verified[node.id];
+          render();
+          scheduleSave();
+
+        } else if (action === 'how-to-check') {
+          const help = document.getElementById('support-help');
+          if (help) help.classList.toggle('hidden');
+
+        } else if (action === 'own-answer') {
+          const input = document.getElementById('custom-answer-input');
+          if (input) {
+            input.focus();
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+
+        } else if (action === 'upload') {
+          state.answers[node.id] = 'Evidence upload pending (integration coming soon)';
+          delete state.skipped[node.id];
+          render();
+          scheduleSave();
+
+        } else if (action === 'previous') {
+          goBack();
+          render();
+        }
+      };
+    });
+  }
+
+  // ---------- render ----------
+  function render() {
+    if (!flow.length) return;
+    const node = flow[state.index];
+
+    if (node.type === 'question') renderQuestion(node);
+    else if (node.type === 'findings') renderFindings(node);
+    else renderVerify(node);
+
+    renderProgress();
+    renderEvidence();
+    bindSupportActions();
+
+    if (window.scrollY > 260) {
+      els.panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  render();
+</script>

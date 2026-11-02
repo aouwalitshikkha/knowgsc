@@ -1,305 +1,333 @@
 {% extends "base.html" %}
-{% block content %}
 
-<main class="min-h-screen">
+{% block title %}KnowGSC — Solve Google Search Console problems step by step{% endblock %}
+{% block meta_description %}Diagnose indexing, crawling, canonicalization and server problems in Google Search Console with adaptive diagnostic workflows, plain-language explanations and verified fixes.{% endblock %}
+
+{% block content %}
+<main>
 
   <!-- ================= HERO ================= -->
-  <section class="relative overflow-hidden bg-gradient-to-b from-indigo-50 to-gray-50">
-    <div class="mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 sm:py-24 lg:px-8 lg:py-28">
-      <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-200">
-        Knowledge-first · Workflow-driven · AI-assisted
-      </span>
+  <section class="relative overflow-hidden border-b border-slate-200 bg-gradient-to-b from-brand-50 via-white to-slate-50">
+    <div class="pointer-events-none absolute inset-0 bg-grid opacity-60" aria-hidden="true"></div>
+    <div class="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-brand-200/40 blur-3xl" aria-hidden="true"></div>
 
-      <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
-        Solve Google Search Console Problems <span class="text-indigo-600">Step by Step</span>.
-      </h1>
+    <div class="container-page relative py-20 sm:py-24 lg:py-28">
+      <div class="mx-auto max-w-3xl text-center">
 
-      <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-        Understand indexing, crawling, canonicalization, server errors, and search performance
-        through guided troubleshooting and practical learning.
-      </p>
+        <span class="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-brand-700 shadow-sm backdrop-blur">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+          Knowledge-first · Workflow-driven · RAG-grounded
+        </span>
 
-      <!-- Conversational search -->
-      <form id="hero-search" class="mx-auto mt-10 max-w-2xl">
-        <div class="overflow-hidden rounded-2xl border border-gray-300 bg-white shadow-sm focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500">
-          <textarea
-            id="hero-search-input"
-            rows="3"
-            placeholder='Try: "My site pages are discovered not index. What can be the problem?"'
-            class="w-full resize-none px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
-          ></textarea>
-          <div class="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-3 py-2">
-            <p class="text-xs text-gray-500">Ask anything about your GSC data · Misspellings welcome · No perfect English needed</p>
-            <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">
-              Ask KnowGSC
-            </button>
+        <h1 class="mt-7 text-balance-tight text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl">
+          Solve Google Search Console problems
+          <span class="bg-gradient-to-r from-brand-600 to-violet-600 bg-clip-text text-transparent">step by step</span>.
+        </h1>
+
+        <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
+          Understand indexing, crawling, canonicalization, server errors and search performance
+          through guided troubleshooting and practical learning — in plain language.
+        </p>
+
+        <!-- Conversational search -->
+        <form id="hero-search" class="mx-auto mt-10 max-w-2xl text-left">
+          <div class="rounded-2xl border border-slate-300 bg-white p-2 shadow-lift transition focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-500/15">
+            <label for="hero-search-input" class="sr-only">Ask KnowGSC about a Search Console problem</label>
+            <textarea
+              id="hero-search-input"
+              rows="2"
+              placeholder='Try: "My pages are discovered but not indexed. What could be wrong?"'
+              class="w-full resize-none rounded-xl px-3 py-2.5 text-[15px] text-slate-900 placeholder-slate-400 focus:outline-none"
+            ></textarea>
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-2 pb-1 pt-2.5">
+              <p class="text-xs text-slate-500">Ask anything · misspellings welcome · no perfect English needed</p>
+              <button type="submit" class="btn-primary">
+                Ask KnowGSC
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-2">
+          <span class="text-xs font-medium uppercase tracking-wide text-slate-400">Popular</span>
+          {% for problem in featured_problems|slice:":3" %}
+            <a href="{{ problem.get_absolute_url }}" class="chip-brand transition hover:bg-brand-100">{{ problem.name }}</a>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WORKS ================= -->
+  <section class="border-b border-slate-200 bg-white py-12">
+    <div class="container-page">
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {% for step in "1234"|make_list %}
+        <div class="flex items-start gap-3">
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-inset ring-brand-200">{{ step }}</span>
+          <div>
+            {% if step == "1" %}
+              <p class="text-sm font-semibold text-slate-900">Diagnose</p>
+              <p class="mt-1 text-xs leading-relaxed text-slate-500">Answer adaptive questions and collect real evidence.</p>
+            {% elif step == "2" %}
+              <p class="text-sm font-semibold text-slate-900">Understand</p>
+              <p class="mt-1 text-xs leading-relaxed text-slate-500">Separate confirmed findings from hypotheses.</p>
+            {% elif step == "3" %}
+              <p class="text-sm font-semibold text-slate-900">Fix</p>
+              <p class="mt-1 text-xs leading-relaxed text-slate-500">Follow a prioritized, specific action plan.</p>
+            {% else %}
+              <p class="text-sm font-semibold text-slate-900">Verify</p>
+              <p class="mt-1 text-xs leading-relaxed text-slate-500">Confirm the fix with explicit verification steps.</p>
+            {% endif %}
           </div>
         </div>
-      </form>
-
-      <!-- Quick suggestion chips -->
-      <div class="mt-6 flex flex-wrap items-center justify-center gap-2">
-        <span class="text-sm text-gray-500">Popular:</span>
-        <a href="#" class="rounded-full bg-white px-3 py-1 text-xs font-medium text-indigo-700 ring-1 ring-indigo-200 hover:bg-indigo-50">My pages are discovered not indexed</a>
-        <a href="#" class="rounded-full bg-white px-3 py-1 text-xs font-medium text-indigo-700 ring-1 ring-indigo-200 hover:bg-indigo-50">Why is Google not indexing my URLs?</a>
-        <a href="#" class="rounded-full bg-white px-3 py-1 text-xs font-medium text-indigo-700 ring-1 ring-indigo-200 hover:bg-indigo-50">Google not crawling my site</a>
+        {% endfor %}
       </div>
     </div>
   </section>
 
   <!-- ================= POPULAR GSC PROBLEMS ================= -->
-  <section class="py-16 sm:py-20">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex items-end justify-between gap-4">
-        <div>
-          <h2 class="text-3xl font-bold tracking-tight text-gray-900">Popular GSC Problems</h2>
-          <p class="mt-2 text-gray-600">Start with the issues most frequently investigated.</p>
+  <section class="section">
+    <div class="container-page">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div class="max-w-2xl">
+          <p class="eyebrow">Start here</p>
+          <h2 class="h2 mt-2">Popular GSC problems</h2>
+          <p class="lead mt-3">The issues most frequently investigated by site owners and SEO teams.</p>
         </div>
-        <a href="#" class="hidden text-sm font-semibold text-indigo-600 hover:text-indigo-500 sm:block">View all problems →</a>
+        <a href="{% url 'workflows' %}" class="link-arrow">
+          View all workflows
+          <span aria-hidden="true">→</span>
+        </a>
       </div>
 
-      <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        <!-- Problem card: Discovered – currently not indexed -->
-        <a href="#" class="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-indigo-300">
-          <div class="flex items-center justify-between">
-            <span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">Indexing</span>
-            <span class="text-xs font-medium text-gray-500">Discovered – currently not indexed</span>
-          </div>
-          <h3 class="mt-4 text-lg font-semibold text-gray-900 group-hover:text-indigo-600">Discovered – currently not indexed</h3>
-          <p class="mt-2 text-sm text-gray-600">Google found the page but hasn't indexed it yet. Weak internal discovery signals or sitemap omission may be at play.</p>
-          <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
-            Investigate <span aria-hidden="true">→</span>
-          </span>
-        </a>
-
-        <!-- Problem card: Crawled – currently not indexed -->
-        <a href="#" class="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-indigo-300">
-          <div class="flex items-center justify-between">
-            <span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">Indexing</span>
-            <span class="text-xs font-medium text-gray-500">Crawled – currently not indexed</span>
-          </div>
-          <h3 class="mt-4 text-lg font-semibold text-gray-900 group-hover:text-indigo-600">Crawled – currently not indexed</h3>
-          <p class="mt-2 text-sm text-gray-600">Google crawled the page but still won't index it. Often related to crawl directives or canonicalization.</p>
-          <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
-            Investigate <span aria-hidden="true">→</span>
-          </span>
-        </a>
-
-        <!-- Problem card: Excluded by noindex -->
-        <a href="#" class="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-indigo-300">
-          <div class="flex items-center justify-between">
-            <span class="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-800">Indexing</span>
-            <span class="text-xs font-medium text-gray-500">Excluded by noindex</span>
-          </div>
-          <h3 class="mt-4 text-lg font-semibold text-gray-900 group-hover:text-indigo-600">Excluded by noindex</h3>
-          <p class="mt-2 text-sm text-gray-600">The page was explicitly excluded from indexing via a noindex directive.</p>
-          <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
-            Investigate <span aria-hidden="true">→</span>
-          </span>
-        </a>
-
-        <!-- Problem card: Blocked by robots.txt -->
-        <a href="#" class="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-indigo-300">
-          <div class="flex items-center justify-between">
-            <span class="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-800">Crawling</span>
-            <span class="text-xs font-medium text-gray-500">Blocked by robots.txt</span>
-          </div>
-          <h3 class="mt-4 text-lg font-semibold text-gray-900 group-hover:text-indigo-600">Blocked by robots.txt</h3>
-          <p class="mt-2 text-sm text-gray-600">Robots.txt prevented Googlebot from fetching the page.</p>
-          <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
-            Investigate <span aria-hidden="true">→</span>
-          </span>
-        </a>
-
-        <!-- Problem card: Soft 404 -->
-        <a href="#" class="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-indigo-300">
-          <div class="flex items-center justify-between">
-            <span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">Indexing</span>
-            <span class="text-xs font-medium text-gray-500">Soft 404</span>
-          </div>
-          <h3 class="mt-4 text-lg font-semibold text-gray-900 group-hover:text-indigo-600">Soft 404</h3>
-          <p class="mt-2 text-sm text-gray-600">The page returns a 200 status but effectively contains no meaningful content.</p>
-          <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
-            Investigate <span aria-hidden="true">→</span>
-          </span>
-        </a>
-
-        <!-- Problem card: Server error 5xx -->
-        <a href="#" class="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-indigo-300">
-          <div class="flex items-center justify-between">
-            <span class="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-800">Crawling &amp; Server</span>
-            <span class="text-xs font-medium text-gray-500">Server error (5xx)</span>
-          </div>
-          <h3 class="mt-4 text-lg font-semibold text-gray-900 group-hover:text-indigo-600">Server error (5xx)</h3>
-          <p class="mt-2 text-sm text-gray-600">The server returned a 5xx error during crawling. Investigate timeout reproducibility and server stability.</p>
-          <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
-            Investigate <span aria-hidden="true">→</span>
-          </span>
-        </a>
+      <div class="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {% for problem in featured_problems %}
+          <a href="{{ problem.get_absolute_url }}" class="card-interactive group flex flex-col p-6">
+            <div class="flex items-center justify-between gap-3">
+              <span class="{{ problem.category.chip_class }}">{{ problem.category.name }}</span>
+              {% if problem.badge %}
+                <span class="text-[11px] font-medium text-slate-400">{{ problem.badge }}</span>
+              {% endif %}
+            </div>
+            <h3 class="mt-4 text-base font-semibold text-slate-900 transition group-hover:text-brand-700">{{ problem.name }}</h3>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-slate-600">{{ problem.summary }}</p>
+            <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 transition-all group-hover:gap-2.5">
+              Investigate <span aria-hidden="true">→</span>
+            </span>
+          </a>
+        {% empty %}
+          <p class="text-sm text-slate-500">No problems have been published yet.</p>
+        {% endfor %}
       </div>
     </div>
   </section>
 
-  <!-- ================= START DIAGNOSTIC SESSION ================= -->
-  <section id="diagnostic-session" class="bg-white py-16 sm:py-20">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="overflow-hidden rounded-3xl bg-indigo-600 px-6 py-12 text-center sm:px-12">
-        <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Ready to investigate your website?</h2>
-        <p class="mx-auto mt-4 max-w-2xl text-indigo-100">
-          Answer a few adaptive questions. We'll separate confirmed evidence from possible explanations
-          and build you a structured action plan with verification steps.
-        </p>
-        <a href="#start"
-           class="mt-8 inline-block rounded-xl bg-white px-6 py-3 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">
-          Start a diagnostic session
-        </a>
+  <!-- ================= DIAGNOSTIC CTA ================= -->
+  <section class="pb-4">
+    <div class="container-page">
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-700 via-brand-600 to-violet-700 px-6 py-14 text-center shadow-lift sm:px-12">
+        <div class="pointer-events-none absolute inset-0 bg-grid opacity-[0.12]" aria-hidden="true"></div>
+        <div class="relative mx-auto max-w-2xl">
+          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-brand-100">Guided investigation</p>
+          <h2 class="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">Ready to investigate your website?</h2>
+          <p class="mt-4 text-base leading-relaxed text-brand-100">
+            Answer a few adaptive questions. KnowGSC separates confirmed evidence from possible explanations
+            and builds a structured action plan with verification steps.
+          </p>
+          <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <a href="{% url 'problem_solver' %}" class="btn-white btn-lg">
+              Start a diagnostic session
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+              </svg>
+            </a>
+            <a href="{% url 'ask' %}" class="btn-on-dark btn-lg">Ask a question first</a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ================= WORKFLOWS PREVIEW ================= -->
-  <section class="py-16 sm:py-20">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex items-end justify-between gap-4">
-        <div>
-          <h2 class="text-3xl font-bold tracking-tight text-gray-900">Troubleshooting Workflows</h2>
-          <p class="mt-2 text-gray-600">Adaptive, branching diagnostic paths powered by the workflow engine.</p>
+  <section class="section">
+    <div class="container-page">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div class="max-w-2xl">
+          <p class="eyebrow">Structured paths</p>
+          <h2 class="h2 mt-2">Troubleshooting workflows</h2>
+          <p class="lead mt-3">Adaptive, branching diagnostic paths powered by the workflow engine.</p>
         </div>
-        <a href="#" class="hidden text-sm font-semibold text-indigo-600 hover:text-indigo-500 sm:block">Explore all workflows →</a>
+        <a href="{% url 'workflows' %}" class="link-arrow">
+          Explore all workflows
+          <span aria-hidden="true">→</span>
+        </a>
       </div>
 
-      <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <span class="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">Workflow</span>
-          <h3 class="mt-4 text-lg font-semibold text-gray-900">Discovered – currently not indexed</h3>
-          <p class="mt-2 text-sm text-gray-600">Confirms GSC status → checks sitemap inclusion → validates internal links → checks HTTP response → collects evidence → generates findings.</p>
-        </div>
-        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <span class="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">Workflow</span>
-          <h3 class="mt-4 text-lg font-semibold text-gray-900">Crawled – currently not indexed</h3>
-          <p class="mt-2 text-sm text-gray-600">Confirms GSC status → checks crawl eligibility → validates directives → inspects canonicals → collects evidence → generates findings.</p>
-        </div>
-        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <span class="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">Workflow</span>
-          <h3 class="mt-4 text-lg font-semibold text-gray-900">Server error (5xx)</h3>
-          <p class="mt-2 text-sm text-gray-600">Checks reproducibility → reviews timeout behavior → inspects logs → validates server stability → recommends fixes.</p>
-        </div>
+      <div class="mt-10 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        {% for workflow in featured_workflows %}
+          <div class="card-pad card-interactive">
+            <div class="flex items-center gap-3">
+              <span class="flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-inset {{ workflow.problem.category.icon_class }}">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008zM10.34 3.94l-8.02 13.9A1.5 1.5 0 003.63 20h16.74a1.5 1.5 0 001.31-2.16l-8.02-13.9a1.5 1.5 0 00-2.62 0z" />
+                </svg>
+              </span>
+              <span class="chip-neutral">{{ workflow.nodes.count }} nodes</span>
+            </div>
+            <h3 class="mt-4 text-base font-semibold text-slate-900">{{ workflow.title }}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ workflow.summary }}</p>
+            <a href="{{ workflow.get_absolute_url }}" class="link-arrow mt-5">Start this workflow <span aria-hidden="true">→</span></a>
+          </div>
+        {% empty %}
+          <p class="text-sm text-slate-500">No workflows have been published yet.</p>
+        {% endfor %}
       </div>
     </div>
   </section>
 
   <!-- ================= LEARNING ROADMAP ================= -->
-  <section class="bg-white py-16 sm:py-20">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex items-end justify-between gap-4">
-        <div>
-          <h2 class="text-3xl font-bold tracking-tight text-gray-900">Learning Roadmap</h2>
-          <p class="mt-2 text-gray-600">Progress from GSC fundamentals to advanced technical SEO.</p>
+  <section class="border-y border-slate-200 bg-white section">
+    <div class="container-page">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div class="max-w-2xl">
+          <p class="eyebrow">Build competence</p>
+          <h2 class="h2 mt-2">Learning roadmap</h2>
+          <p class="lead mt-3">Progress from GSC fundamentals to advanced technical SEO, one level at a time.</p>
         </div>
-        <a href="#" class="hidden text-sm font-semibold text-indigo-600 hover:text-indigo-500 sm:block">Start learning →</a>
+        <a href="{% url 'learning' %}" class="link-arrow">
+          Open the roadmap
+          <span aria-hidden="true">→</span>
+        </a>
       </div>
 
-      <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
-          <span class="text-3xl font-bold text-indigo-600">1</span>
-          <h3 class="mt-2 text-sm font-semibold text-gray-900">GSC Fundamentals</h3>
-          <p class="mt-1 text-xs text-gray-600">Understand reports and indexing terminology.</p>
-        </div>
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
-          <span class="text-3xl font-bold text-indigo-600">2</span>
-          <h3 class="mt-2 text-sm font-semibold text-gray-900">Indexing Diagnostics</h3>
-          <p class="mt-1 text-xs text-gray-600">Investigate common indexing exclusions.</p>
-        </div>
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
-          <span class="text-3xl font-bold text-indigo-600">3</span>
-          <h3 class="mt-2 text-sm font-semibold text-gray-900">Technical SEO</h3>
-          <p class="mt-1 text-xs text-gray-600">Analyze HTTP, crawling, rendering, and server behavior.</p>
-        </div>
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
-          <span class="text-3xl font-bold text-indigo-600">4</span>
-          <h3 class="mt-2 text-sm font-semibold text-gray-900">Search Performance</h3>
-          <p class="mt-1 text-xs text-gray-600">Investigate traffic and ranking changes.</p>
-        </div>
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
-          <span class="text-3xl font-bold text-indigo-600">5</span>
-          <h3 class="mt-2 text-sm font-semibold text-gray-900">Advanced SEO</h3>
-          <p class="mt-1 text-xs text-gray-600">Handle large-scale and complex technical cases.</p>
-        </div>
-      </div>
+      <ol class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {% for level in levels %}
+          <li class="card p-5 {% if level.is_current %}ring-2 ring-brand-500/30{% endif %}">
+            <div class="flex items-center justify-between">
+              <span class="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold ring-1 ring-inset
+                {% if level.status == 'completed' %}bg-emerald-50 text-emerald-700 ring-emerald-200
+                {% elif level.is_current %}border-0 bg-brand-600 text-white ring-transparent
+                {% else %}bg-slate-100 text-slate-600 ring-slate-200{% endif %}">
+                {{ level.number }}
+              </span>
+              <span class="{{ level.chip_class }}">{{ level.status_label }}</span>
+            </div>
+            <h3 class="mt-4 text-sm font-semibold text-slate-900">{{ level.short_title }}</h3>
+            <p class="mt-1.5 text-xs leading-relaxed text-slate-500">{{ level.subtitle }}</p>
+          </li>
+        {% empty %}
+          <p class="text-sm text-slate-500">No learning path has been published yet.</p>
+        {% endfor %}
+      </ol>
     </div>
   </section>
 
   <!-- ================= PRACTICE LAB ================= -->
-  <section class="bg-indigo-700 py-16 sm:py-20">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
-        <div class="max-w-2xl">
-          <h2 class="text-3xl font-bold tracking-tight text-white">GSC Practice Lab</h2>
-          <p class="mt-4 text-indigo-100">
-            Investigate simulated Google Search Console scenarios with fictional performance reports,
-            indexing reports, URL Inspection results, sitemap reports, and technical errors. Get feedback
-            on your investigation approach.
-          </p>
-        </div>
-        <a href="#practice-lab"
-           class="inline-flex shrink-0 items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">
-          Open Practice Lab →
-        </a>
-      </div>
+  <section class="section">
+    <div class="container-page">
+      <div class="overflow-hidden rounded-3xl bg-slate-900 shadow-lift">
+        <div class="grid gap-10 p-8 sm:p-12 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-brand-300">Practice without risk</p>
+            <h2 class="mt-3 text-2xl font-bold tracking-tight text-white sm:text-3xl">GSC Practice Lab</h2>
+            <p class="mt-4 text-sm leading-relaxed text-slate-300 sm:text-base">
+              Investigate simulated Search Console scenarios with fictional performance reports, indexing reports,
+              URL Inspection results, sitemaps and technical errors. Get feedback on your investigation approach.
+            </p>
+            <a href="{% url 'practice_lab' %}" class="btn-white mt-7">
+              Open Practice Lab
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+              </svg>
+            </a>
+          </div>
 
-      <div class="mt-8 flex flex-wrap gap-2">
-        <span class="rounded-full bg-indigo-800 px-3 py-1.5 text-xs font-medium text-indigo-100">Discovered – currently not indexed</span>
-        <span class="rounded-full bg-indigo-800 px-3 py-1.5 text-xs font-medium text-indigo-100">Crawled – currently not indexed</span>
-        <span class="rounded-full bg-indigo-800 px-3 py-1.5 text-xs font-medium text-indigo-100">Duplicate canonical issue</span>
-        <span class="rounded-full bg-indigo-800 px-3 py-1.5 text-xs font-medium text-indigo-100">Redirect error</span>
-        <span class="rounded-full bg-indigo-800 px-3 py-1.5 text-xs font-medium text-indigo-100">5xx server error</span>
-        <span class="rounded-full bg-indigo-800 px-3 py-1.5 text-xs font-medium text-indigo-100">Blocked by robots.txt</span>
-        <span class="rounded-full bg-indigo-800 px-3 py-1.5 text-xs font-medium text-indigo-100">Sitemap errors</span>
-        <span class="rounded-full bg-indigo-800 px-3 py-1.5 text-xs font-medium text-indigo-100">Soft 404</span>
-        <span class="rounded-full bg-indigo-800 px-3 py-1.5 text-xs font-medium text-indigo-100">Core Web Vitals problems</span>
-        <span class="rounded-full bg-indigo-800 px-3 py-1.5 text-xs font-medium text-indigo-100">Sudden traffic decline</span>
+          {% if lab_scenario %}
+          <div class="relative">
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span>{{ lab_scenario.report_title }}</span>
+                <span class="chip-warn">Simulated</span>
+              </div>
+              <div class="mt-4 grid grid-cols-2 gap-3">
+                {% for metric in lab_scenario.metrics %}
+                  <div class="rounded-xl bg-slate-800/70 p-3">
+                    <p class="text-[11px] text-slate-400">{{ metric.label }}</p>
+                    <p class="mt-1 text-xl font-bold {% if metric.tone == 'warn' %}text-amber-400{% elif metric.tone == 'danger' %}text-rose-400{% elif metric.tone == 'ok' %}text-emerald-400{% else %}text-white{% endif %}">{{ metric.value }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="mt-4 flex flex-wrap gap-1.5">
+                <span class="rounded-md bg-white/10 px-2 py-1 text-[10px] font-medium text-slate-300">Canonical</span>
+                <span class="rounded-md bg-white/10 px-2 py-1 text-[10px] font-medium text-slate-300">Redirects</span>
+                <span class="rounded-md bg-white/10 px-2 py-1 text-[10px] font-medium text-slate-300">robots.txt</span>
+                <span class="rounded-md bg-white/10 px-2 py-1 text-[10px] font-medium text-slate-300">5xx</span>
+                <span class="rounded-md bg-white/10 px-2 py-1 text-[10px] font-medium text-slate-300">Soft 404</span>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ================= OFFICIAL GOOGLE RESOURCES ================= -->
-  <section class="py-16 sm:py-20">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900">Official Google Resources</h2>
-      <p class="mt-2 text-gray-600">Curated, contextual references supporting investigations.</p>
+  <section class="border-t border-slate-200 bg-white section">
+    <div class="container-page">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div class="max-w-2xl">
+          <p class="eyebrow">Primary sources</p>
+          <h2 class="h2 mt-2">Official Google resources</h2>
+          <p class="lead mt-3">Curated, contextual references that support every investigation.</p>
+        </div>
+        <a href="{% url 'resources' %}" class="link-arrow">
+          Browse the library
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
 
-      <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h3 class="text-base font-semibold text-gray-900">Google Search Central</h3>
-          <p class="mt-1 text-sm text-gray-600">Search and crawling documentation.</p>
-          <a href="#" class="mt-3 inline-block text-sm font-semibold text-indigo-600 hover:text-indigo-500">Visit resource →</a>
-        </div>
-        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h3 class="text-base font-semibold text-gray-900">Google Search Console Help</h3>
-          <p class="mt-1 text-sm text-gray-600">GSC reports and troubleshooting.</p>
-          <a href="#" class="mt-3 inline-block text-sm font-semibold text-indigo-600 hover:text-indigo-500">Visit resource →</a>
-        </div>
-        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h3 class="text-base font-semibold text-gray-900">PageSpeed Insights</h3>
-          <p class="mt-1 text-sm text-gray-600">Performance analysis.</p>
-          <a href="#" class="mt-3 inline-block text-sm font-semibold text-indigo-600 hover:text-indigo-500">Visit resource →</a>
-        </div>
+      <div class="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {% for resource in featured_resources %}
+          <a href="{{ resource.url }}" target="_blank" rel="noopener" class="card-pad card-interactive group">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-semibold text-slate-900 group-hover:text-brand-700">{{ resource.title }}</h3>
+              <span class="chip-ok">Active</span>
+            </div>
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ resource.description }}</p>
+            <span class="link-arrow mt-4">Visit resource <span aria-hidden="true">↗</span></span>
+          </a>
+        {% empty %}
+          <p class="text-sm text-slate-500">No resources have been published yet.</p>
+        {% endfor %}
       </div>
     </div>
   </section>
 
-  <!-- ================= CTA ================= -->
-  <section class="bg-white py-16 sm:py-20">
-    <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900">Not sure where to start?</h2>
-      <p class="mx-auto mt-4 max-w-2xl text-gray-600">
-        Ask KnowGSC in plain language. It explains the problem first, shows relevant resources, and only
-        offers an investigation once you're ready.
-      </p>
-      <a href="#ask"
-         class="mt-8 inline-block rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500">
-        Ask KnowGSC
-      </a>
+  <!-- ================= FINAL CTA ================= -->
+  <section class="section">
+    <div class="container-page">
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="h2">Not sure where to start?</h2>
+        <p class="lead mt-4">
+          Ask KnowGSC in plain language. It retrieves reviewed sources, explains the problem first,
+          and only offers an investigation once you're ready.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <a href="{% url 'ask' %}" class="btn-primary btn-lg">
+            Ask KnowGSC
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+            </svg>
+          </a>
+          <a href="{% url 'workflows' %}" class="btn-secondary btn-lg">Browse workflows</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -313,11 +341,20 @@
       const input = document.getElementById('hero-search-input');
       if (!input) return;
       const question = input.value.trim();
-      if (question) {
-        window.location.href = '/ask?question=' + encodeURIComponent(question);
+      window.location.href = question
+        ? '/ask/?question=' + encodeURIComponent(question)
+        : '/ask/';
+    });
+  }
+
+  const heroInput = document.getElementById('hero-search-input');
+  if (heroInput) {
+    heroInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        heroSearch.requestSubmit();
       }
     });
   }
 </script>
-
 {% endblock %}

@@ -4,89 +4,215 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}KnowGSC — Google Search Console Problem-Solving Platform{% endblock %}</title>
-  <meta name="description" content="KnowGSC — a knowledge-first, workflow-driven Google Search Console problem-solving platform. Diagnose, understand, learn, fix, verify." />
+  <meta name="description" content="{% block meta_description %}KnowGSC — a knowledge-first, workflow-driven Google Search Console problem-solving platform. Diagnose, understand, learn, fix, verify.{% endblock %}" />
   <meta name="keywords" content="Google Search Console, SEO, technical SEO, indexing, crawling, diagnostic workflow, GSC troubleshooting" />
   <meta name="author" content="KnowGSC" />
-  <link rel="canonical" href="http://localhost:8000/" />
-  <meta property="og:title" content="KnowGSC — Google Search Console Problem-Solving Platform" />
-  <meta property="og:description" content="Diagnose, understand, learn, fix, verify — a knowledge-first Google Search Console problem-solving platform." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}" />
+  <meta property="og:site_name" content="KnowGSC" />
+  <meta property="og:title" content="{% block og_title %}KnowGSC — Google Search Console Problem-Solving Platform{% endblock %}" />
+  <meta property="og:description" content="{% block og_description %}Diagnose, understand, learn, fix, verify — a knowledge-first Google Search Console problem-solving platform.{% endblock %}" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="http://localhost:8000/" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}" />
+  <meta name="twitter:card" content="summary_large_image" />
   {% load static %}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'css/output.css' %}" />
   <link rel="icon" type="image/svg+xml" href="{% static 'css/favicon.svg' %}" />
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased">
+<body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
 
-  <!-- ================= HEADER (shared across all KnowGSC pages) ================= -->
-  <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-      <a href="{% url 'home' %}" class="flex items-center gap-2 text-lg font-bold tracking-tight">
-        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">G</span>
-        <span>KnowGSC</span>
-        <span class="hidden text-xs font-medium text-gray-500 sm:inline">GSC Problem Solver</span>
-      </a>
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">
+    Skip to content
+  </a>
 
-      <nav class="hidden md:flex md:items-center md:gap-6">
-        <a href="{% url 'home' %}" class="text-sm font-medium text-gray-900 hover:text-indigo-600">Home</a>
-        <a href="{% url 'ask' %}" class="text-sm font-medium text-gray-600 hover:text-indigo-600">Ask KnowGSC</a>
-        <a href="{% url 'problem_solver' %}" class="text-sm font-medium text-gray-600 hover:text-indigo-600">Problem Solver</a>
-        <a href="{% url 'workflows' %}" class="text-sm font-medium text-gray-600 hover:text-indigo-600">Workflows</a>
-        <a href="{% url 'learning' %}" class="text-sm font-medium text-gray-600 hover:text-indigo-600">Learning Roadmap</a>
-        <a href="{% url 'practice_lab' %}" class="text-sm font-medium text-gray-600 hover:text-indigo-600">Practice Lab</a>
-        <a href="{% url 'resources' %}" class="text-sm font-medium text-gray-600 hover:text-indigo-600">Resources</a>
-      </nav>
+  <!-- ================= HEADER ================= -->
+  <header id="site-header" class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-md">
+    {% with u=request.resolver_match.url_name %}
+    <div class="container-page">
+      <div class="flex h-16 items-center justify-between gap-4">
 
-      <a href="{% url 'problem_solver' %}" class="hidden rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500 md:inline-block">
-        Start Diagnosis
-      </a>
+        <a href="{% url 'home' %}" class="group flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">
+          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white shadow-sm transition group-hover:scale-105">G</span>
+          <span class="flex flex-col leading-none">
+            <span class="text-[15px] font-bold tracking-tight text-slate-900">KnowGSC</span>
+            <span class="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-slate-400">GSC Problem Solver</span>
+          </span>
+        </a>
 
-      <button id="mobile-menu-btn" class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 md:hidden" aria-label="Toggle navigation">
-        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-    </div>
+        <nav class="hidden items-center gap-0.5 md:flex" aria-label="Primary">
+          <a href="{% url 'home' %}" class="nav-link {% if u == 'home' %}nav-link-active{% endif %}">Home</a>
+          <a href="{% url 'ask' %}" class="nav-link {% if u == 'ask' %}nav-link-active{% endif %}">Ask KnowGSC</a>
+          <a href="{% url 'problem_solver' %}" class="nav-link {% if u == 'problem_solver' %}nav-link-active{% endif %}">Problem Solver</a>
+          <a href="{% url 'workflows' %}" class="nav-link {% if u == 'workflows' %}nav-link-active{% endif %}">Workflows</a>
+          <a href="{% url 'learning' %}" class="nav-link {% if u == 'learning' or u == 'lesson_detail' %}nav-link-active{% endif %}">Learning</a>
+          <a href="{% url 'practice_lab' %}" class="nav-link {% if u == 'practice_lab' or u == 'practice_scenario_detail' %}nav-link-active{% endif %}">Practice Lab</a>
+          <a href="{% url 'resources' %}" class="nav-link {% if u == 'resources' %}nav-link-active{% endif %}">Resources</a>
+        </nav>
 
-    <div id="mobile-menu" class="hidden border-t border-gray-200 bg-white px-4 py-4 md:hidden">
-      <div class="flex flex-col gap-1">
-        <a href="{% url 'home' %}" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Home</a>
-        <a href="{% url 'ask' %}" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Ask KnowGSC</a>
-        <a href="{% url 'problem_solver' %}" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Problem Solver</a>
-        <a href="{% url 'workflows' %}" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Workflows</a>
-        <a href="{% url 'learning' %}" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Learning Roadmap</a>
-        <a href="{% url 'practice_lab' %}" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Practice Lab</a>
-        <a href="{% url 'resources' %}" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Resources</a>
+        <div class="flex items-center gap-2">
+          <a href="{% url 'problem_solver' %}" class="btn-primary btn-sm hidden md:inline-flex">
+            Start diagnosis
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+            </svg>
+          </a>
+
+          <button id="mobile-menu-btn" type="button"
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 md:hidden"
+                  aria-label="Toggle navigation" aria-expanded="false" aria-controls="mobile-menu">
+            <svg id="icon-open" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+            <svg id="icon-close" class="hidden h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       </div>
-      <a href="{% url 'problem_solver' %}" class="mt-3 block rounded-lg bg-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-indigo-500">
-        Start Diagnosis
-      </a>
     </div>
+
+    <!-- Mobile navigation -->
+    <div id="mobile-menu" class="hidden border-t border-slate-200 bg-white md:hidden">
+      <nav class="container-page space-y-1 py-4" aria-label="Mobile">
+        <a href="{% url 'home' %}" class="nav-link-mobile {% if u == 'home' %}nav-link-active{% endif %}">Home</a>
+        <a href="{% url 'ask' %}" class="nav-link-mobile {% if u == 'ask' %}nav-link-active{% endif %}">Ask KnowGSC</a>
+        <a href="{% url 'problem_solver' %}" class="nav-link-mobile {% if u == 'problem_solver' %}nav-link-active{% endif %}">Problem Solver</a>
+        <a href="{% url 'workflows' %}" class="nav-link-mobile {% if u == 'workflows' %}nav-link-active{% endif %}">Workflows</a>
+        <a href="{% url 'learning' %}" class="nav-link-mobile {% if u == 'learning' or u == 'lesson_detail' %}nav-link-active{% endif %}">Learning Roadmap</a>
+        <a href="{% url 'practice_lab' %}" class="nav-link-mobile {% if u == 'practice_lab' or u == 'practice_scenario_detail' %}nav-link-active{% endif %}">Practice Lab</a>
+        <a href="{% url 'resources' %}" class="nav-link-mobile {% if u == 'resources' %}nav-link-active{% endif %}">Resources</a>
+        <a href="{% url 'problem_solver' %}" class="btn-primary mt-3 w-full">
+          Start diagnosis
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+          </svg>
+        </a>
+      </nav>
+    </div>
+    {% endwith %}
   </header>
 
-  <!-- ================= MAIN CONTENT (page-specific) ================= -->
-  {% block content %}{% endblock %}
+  <!-- ================= MAIN ================= -->
+  <div id="main">
+    {% block content %}{% endblock %}
+  </div>
 
-  <!-- ================= FOOTER (shared) ================= -->
-  <footer class="border-t border-gray-200 bg-white py-10">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <p class="text-sm text-gray-500">KnowGSC — Diagnose. Understand. Learn. Fix. Verify.</p>
-        <div class="flex gap-6 text-sm">
-          <a href="#" class="text-gray-500 hover:text-indigo-600">Privacy</a>
-          <a href="#" class="text-gray-500 hover:text-indigo-600">Terms</a>
-          <a href="#" class="text-gray-500 hover:text-indigo-600">Contact</a>
+  <!-- ================= FOOTER ================= -->
+  {% block footer %}
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="container-page py-12">
+      <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="lg:col-span-1">
+          <a href="{% url 'home' %}" class="flex items-center gap-2.5">
+            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white">G</span>
+            <span class="text-[15px] font-bold tracking-tight text-slate-900">KnowGSC</span>
+          </a>
+          <p class="mt-4 max-w-xs text-sm leading-relaxed text-slate-500">
+            A knowledge-first, workflow-driven way to diagnose Google Search Console problems.
+          </p>
+          <p class="mt-4 text-xs font-medium text-slate-400">
+            Diagnose · Understand · Learn · Fix · Verify
+          </p>
+        </div>
+
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-900">Product</h2>
+          <ul class="mt-4 space-y-2.5 text-sm">
+            <li><a href="{% url 'ask' %}" class="text-slate-600 transition hover:text-brand-600">Ask KnowGSC</a></li>
+            <li><a href="{% url 'problem_solver' %}" class="text-slate-600 transition hover:text-brand-600">Problem Solver</a></li>
+            <li><a href="{% url 'workflows' %}" class="text-slate-600 transition hover:text-brand-600">Workflows</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-900">Learn</h2>
+          <ul class="mt-4 space-y-2.5 text-sm">
+            <li><a href="{% url 'learning' %}" class="text-slate-600 transition hover:text-brand-600">Learning Roadmap</a></li>
+            <li><a href="{% url 'practice_lab' %}" class="text-slate-600 transition hover:text-brand-600">Practice Lab</a></li>
+            <li><a href="{% url 'resources' %}" class="text-slate-600 transition hover:text-brand-600">Resources</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-900">Google</h2>
+          <ul class="mt-4 space-y-2.5 text-sm">
+            <li><a href="https://developers.google.com/search/docs" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-slate-600 transition hover:text-brand-600">Search Central <span aria-hidden="true">↗</span></a></li>
+            <li><a href="https://support.google.com/webmasters/" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-slate-600 transition hover:text-brand-600">GSC Help <span aria-hidden="true">↗</span></a></li>
+            <li><a href="https://pagespeed.web.dev/" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-slate-600 transition hover:text-brand-600">PageSpeed Insights <span aria-hidden="true">↗</span></a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 sm:flex-row">
+        <p class="text-xs text-slate-500">© {% now "Y" %} KnowGSC. Diagnostic guidance is educational, not official Google advice.</p>
+        <div class="flex gap-6 text-xs">
+          <a href="#" class="text-slate-500 transition hover:text-brand-600">Privacy</a>
+          <a href="#" class="text-slate-500 transition hover:text-brand-600">Terms</a>
+          <a href="#" class="text-slate-500 transition hover:text-brand-600">Contact</a>
         </div>
       </div>
     </div>
   </footer>
+  {% endblock %}
+
+  <!-- Back to top -->
+  <button id="to-top" type="button"
+          class="pointer-events-none fixed bottom-6 right-6 z-30 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 opacity-0 shadow-lift transition hover:text-brand-600"
+          aria-label="Back to top">
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+    </svg>
+  </button>
 
   <script>
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
-    mobileMenuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
-    });
+    (function () {
+      const btn = document.getElementById('mobile-menu-btn');
+      const menu = document.getElementById('mobile-menu');
+      const openIcon = document.getElementById('icon-open');
+      const closeIcon = document.getElementById('icon-close');
+
+      function setMenu(open) {
+        menu.classList.toggle('hidden', !open);
+        openIcon.classList.toggle('hidden', open);
+        closeIcon.classList.toggle('hidden', !open);
+        btn.setAttribute('aria-expanded', String(open));
+      }
+
+      btn.addEventListener('click', function () {
+        setMenu(menu.classList.contains('hidden'));
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') setMenu(false);
+      });
+
+      // Close the mobile menu after navigating to an in-page anchor
+      menu.addEventListener('click', function (e) {
+        if (e.target.closest('a')) setMenu(false);
+      });
+
+      // Sticky header elevation + back-to-top visibility
+      const header = document.getElementById('site-header');
+      const toTop = document.getElementById('to-top');
+
+      function onScroll() {
+        const y = window.scrollY;
+        header.classList.toggle('shadow-soft', y > 4);
+        toTop.classList.toggle('opacity-0', y < 400);
+        toTop.classList.toggle('pointer-events-none', y < 400);
+        toTop.classList.toggle('opacity-100', y >= 400);
+      }
+
+      toTop.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
   </script>
 
 </body>

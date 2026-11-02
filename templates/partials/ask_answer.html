@@ -1,0 +1,174 @@
+{% if answer.no_match %}
+  {% include "partials/ask_no_topic.html" %}
+{% else %}
+<div class="flex justify-start gap-3">
+  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-xs font-bold text-white">G</div>
+
+  <div class="min-w-0 max-w-3xl flex-1 space-y-3">
+
+    <!-- Intro + definition -->
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="chip-brand">Grounded in reviewed sources</span>
+        <span class="{{ answer.confidence_class }}">{{ answer.confidence_label }}</span>
+        {% if answer.topic %}<span class="chip-neutral">{{ answer.topic.title }}</span>{% endif %}
+      </div>
+      <p class="mt-3 text-sm leading-relaxed text-slate-800">{{ answer.intro }}</p>
+
+      {% if answer.definition %}
+        <div class="mt-3 rounded-lg border border-brand-100 bg-brand-50 p-3.5">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-brand-800">Definition</p>
+          <p class="mt-1 text-sm leading-relaxed text-brand-950">{{ answer.definition }}</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Extracted key points -->
+    {% if answer.key_points %}
+      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">What the knowledge base says</p>
+        <ul class="mt-3 space-y-2">
+          {% for point in answer.key_points %}
+            <li class="flex items-start gap-2 text-sm leading-relaxed text-slate-700">
+              <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" aria-hidden="true"></span>
+              <span>{{ point }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <!-- Hypotheses from the curated topic layer -->
+    {% if answer.hypotheses %}
+      <div class="rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <p class="text-[11px] font-bold uppercase tracking-wide text-amber-800">Possible causes · labelled as hypotheses</p>
+        <ul class="mt-3 space-y-2">
+          {% for cause in answer.hypotheses %}
+            <li class="flex flex-wrap items-start gap-2 text-sm text-amber-950">
+              <span class="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-900">Hypothesis</span>
+              <span class="min-w-0 flex-1">{{ cause }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="mt-3 text-xs leading-relaxed text-amber-900/80">
+          These are explanations to investigate, not confirmed causes for your site.
+        </p>
+      </div>
+    {% endif %}
+
+    <!-- Action steps extracted from source headings -->
+    {% if answer.steps %}
+      <div class="rounded-xl border border-brand-200 bg-brand-50/60 p-4">
+        <p class="text-[11px] font-bold uppercase tracking-wide text-brand-800">Recommended checks and fixes</p>
+        <div class="mt-3 space-y-4">
+          {% for group in answer.steps %}
+            <div>
+              <p class="text-xs font-semibold text-brand-900">{{ group.heading }}</p>
+              <ol class="mt-2 space-y-1.5">
+                {% for item in group.items %}
+                  <li class="flex items-start gap-2.5 text-sm text-slate-800">
+                    <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-brand-700 ring-1 ring-brand-200">{{ forloop.counter }}</span>
+                    <span>{{ item }}</span>
+                  </li>
+                {% endfor %}
+              </ol>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Retrieved passages with attribution -->
+    {% if answer.passages %}
+      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Retrieved passages</p>
+          <span class="text-[11px] text-slate-400">{{ answer.passages|length }} source passage{{ answer.passages|length|pluralize }}</span>
+        </div>
+
+        <div class="mt-3 space-y-2">
+          {% for passage in answer.passages %}
+            <details class="group rounded-lg border border-slate-200 bg-slate-50/60 open:bg-white">
+              <summary class="flex cursor-pointer list-none items-start justify-between gap-3 p-3">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-slate-900">{{ passage.heading }}</p>
+                  <p class="mt-0.5 text-xs text-slate-500">{{ passage.source_title }} · {{ passage.doc_type }}</p>
+                </div>
+                <span class="mt-0.5 shrink-0 text-xs font-semibold text-brand-600 group-open:hidden">Read</span>
+                <span class="mt-0.5 hidden shrink-0 text-xs font-semibold text-brand-600 group-open:inline">Close</span>
+              </summary>
+              <div class="border-t border-slate-200 px-3 py-3">
+                <p class="text-sm leading-relaxed text-slate-700">{{ passage.text }}</p>
+                {% if passage.source_url %}
+                  <a href="{{ passage.source_url }}" target="_blank" rel="noopener" class="link-arrow mt-2">
+                    Open source <span aria-hidden="true">↗</span>
+                  </a>
+                {% endif %}
+              </div>
+            </details>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Optional grounded LLM summary -->
+    {% if answer.llm_text %}
+      <div class="rounded-xl border border-violet-200 bg-violet-50 p-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-violet-800">AI-assisted summary</p>
+          <span class="chip-neutral">Grounded in the cited passages</span>
+        </div>
+        <div class="mt-2 text-sm leading-relaxed text-violet-950">{{ answer.llm_text|linebreaks }}</div>
+      </div>
+    {% endif %}
+
+    <!-- Sources -->
+    {% if answer.sources %}
+      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Sources used</p>
+        <ul class="mt-2 space-y-2">
+          {% for source in answer.sources %}
+            <li class="flex items-start gap-2 text-sm">
+              <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" aria-hidden="true"></span>
+              {% if source.url %}
+                <a href="{{ source.url }}" target="_blank" rel="noopener" class="font-medium text-brand-600 hover:text-brand-500 hover:underline">
+                  {{ source.title }} <span aria-hidden="true">↗</span>
+                </a>
+              {% else %}
+                <span class="font-medium text-slate-800">{{ source.title }}</span>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <!-- Safety note + next step -->
+    <div class="rounded-xl border border-amber-300 bg-amber-100 p-4">
+      <p class="text-sm font-bold text-amber-900">Keep hypotheses separate from facts</p>
+      <p class="mt-1 text-sm leading-relaxed text-amber-900">
+        This answer is built from reviewed documentation. It explains likely causes, but it has not
+        verified your site's data. Confirm each item with Search Console or URL Inspection before acting.
+      </p>
+    </div>
+
+    <div class="rounded-xl bg-brand-600 p-5 text-white">
+      <h3 class="text-base font-bold">Would you like to investigate your website?</h3>
+      <p class="mt-2 text-sm text-brand-100">
+        Run a guided workflow to collect evidence and separate confirmed findings from hypotheses.
+      </p>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <a href="{% url 'problem_solver' %}{% if answer.topic.problem %}?problem={{ answer.topic.problem.slug }}{% endif %}"
+           class="inline-flex items-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">
+          Help me investigate
+        </a>
+        <a href="{% url 'workflows' %}"
+           class="inline-flex items-center rounded-lg border border-white/60 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10">
+          Browse workflows
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endif %}

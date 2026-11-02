@@ -1,0 +1,41 @@
+<div class="flex justify-start gap-3">
+  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-400 to-slate-600 text-xs font-bold text-white">G</div>
+
+  <div class="min-w-0 max-w-3xl flex-1 space-y-3">
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="chip-neutral">Knowledge gap</span>
+        <span class="chip-warn">No reviewed match</span>
+      </div>
+
+      <h2 class="mt-3 text-base font-bold text-slate-900">I couldn't find a reviewed source for that question</h2>
+      <p class="mt-2 text-sm leading-relaxed text-slate-700">
+        KnowGSC only answers from approved documentation. Rather than guess, it recorded this question
+        as a knowledge gap so the library can be extended.
+      </p>
+      <p class="mt-2 text-sm leading-relaxed text-slate-600">
+        Try rephrasing with a Search Console status or a specific signal, for example
+        <em>“Crawled – currently not indexed”</em>, <em>“robots.txt blocking”</em> or
+        <em>“5xx errors on Googlebot”</em>.
+      </p>
+
+      {% if suggestions %}
+        <div class="mt-4">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Try a reviewed question</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            {% for topic in suggestions %}
+              <button type="button" class="suggestion-chip chip-brand transition hover:bg-brand-100" data-question="{{ topic.example_question }}">
+                {{ topic.example_question }}
+              </button>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a href="{% url 'workflows' %}" class="btn-secondary btn-sm">Browse workflows</a>
+        <a href="{% url 'resources' %}" class="btn-ghost btn-sm">Open the resource library</a>
+      </div>
+    </div>
+  </div>
+</div>

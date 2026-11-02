@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Diagnostic report — {{ workflow.title }} | KnowGSC{% endblock %}
+{% block meta_description %}Saved evidence report for the {{ workflow.title }} diagnostic workflow.{% endblock %}
+
+{% block content %}
+<main class="min-h-screen">
+
+  <!-- Report header -->
+  <section class="page-header">
+    <div class="container-page py-8">
+      <nav class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-slate-400" aria-label="Breadcrumb">
+        <a href="{% url 'workflows' %}" class="breadcrumb">Workflows</a>
+        <span aria-hidden="true">/</span>
+        <a href="{{ workflow.get_absolute_url }}" class="breadcrumb">{{ workflow.title }}</a>
+        <span aria-hidden="true">/</span>
+        <span class="text-slate-600" aria-current="page">Report</span>
+      </nav>
+
+      <div class="mt-5 flex flex-wrap items-start justify-between gap-5">
+        <div class="max-w-3xl">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="chip-brand">Diagnostic report</span>
+            <span class="chip-neutral">v{{ session.workflow_version|default:workflow.version }}</span>
+            {% if session.status == 'completed' %}
+              <span class="chip-ok">Completed</span>
+            {% else %}
+              <span class="chip-warn">In progress</span>
+            {% endif %}
+          </div>
+          <h1 class="h1 mt-3 text-3xl sm:text-4xl">{{ workflow.title }}</h1>
+          <p class="lead mt-3">{{ workflow.summary }}</p>
+          <p class="mt-2 text-sm text-slate-500">
+            {{ problem.name|default:"No linked problem" }}
+            <span class="text-slate-300">·</span>
+            Updated <time datetime="{{ session.updated_at|date:'c' }}">{{ session.updated_at|date:"M j, Y, H:i" }}</time>
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="{{ workflow.get_absolute_url }}" class="btn-secondary">
+            <span aria-hidden="true">←</span> Back to workflow
+          </a>
+          <a href="{% url 'workflows' %}" class="btn-primary">Browse workflows</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-10 pb-16">
+    <div class="container-page">
+
+      <!-- Summary -->
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="card-pad">
+          <p class="text-xs font-medium text-slate-500">Answers recorded</p>
+          <p class="stat-value">{{ answers|length }}</p>
+        </div>
+        <div class="card-pad">
+          <p class="text-xs font-medium text-slate-500">Evidence items</p>
+          <p class="stat-value">{{ evidence|length }}</p>
+        </div>
+        <div class="card-pad">
+          <p class="text-xs font-medium text-slate-500">Hypotheses</p>
+          <p class="stat-value">{{ findings|length }}</p>
+        </div>
+        <div class="card-pad">
+          <p class="text-xs font-medium text-slate-500">Recommended actions</p>
+          <p class="stat-value">{{ actions|length }}</p>
+        </div>
+      </div>
+
+      <div class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+
+        <div class="min-w-0 space-y-8">
+
+          <!-- Evidence -->
+          <section class="card overflow-hidden" aria-labelledby="evidence-heading">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50/70 px-5 py-3.5">
+              <h2 id="evidence-heading" class="h3">Evidence recorded</h2>
+              <span class="chip-neutral">{{ evidence|length }} item{{ evidence|length|pluralize }}</span>
+            </div>
+
+            {% if evidence %}
+              <div class="overflow-x-auto">
+                <table class="w-full min-w-[640px] text-left text-sm">
+                  <thead class="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th scope="col" class="px-5 py-3 font-semibold">Check</th>
+                      <th scope="col" class="px-5 py-3 font-semibold">Reported answer</th>
+                      <th scope="col" class="px-5 py-3 font-semibold">Source</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100">
+                    {% for item in evidence %}
+                      <tr>
+                        <td class="px-5 py-3 font-medium text-slate-800">{{ item.label }}</td>
+                        <td class="px-5 py-3 text-slate-700">{{ item.value }}</td>
+                        <td class="px-5 py-3">
+                          {% if item.source == 'verified' %}
+                            <span class="chip-ok">Verified</span>
+                          {% else %}
+                            <span class="chip-neutral">User reported</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="p-6">
+                <p class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
+                  No answers were recorded for this session.
+                </p>
+              </div>
+            {% endif %}
+          </section>
+
+          <!-- Findings -->
+          <section class="card p-6" aria-labelledby="findings-heading">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 id="findings-heading" class="h3">Findings &amp; hypotheses</h2>
+              <span class="chip-warn">Not confirmed causes</span>
+            </div>
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">
+              These explanations are generated from the recorded evidence. They remain
+              hypotheses until the corresponding checks are verified.
+            </p>
+
+            {% if findings %}
+              <ul class="mt-5 space-y-3">
+                {% for finding in findings %}
+                  <li class="rounded-xl border border-amber-200 bg-amber-50/70 p-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="chip-warn">Hypothesis</span>
+                      <span class="text-[11px] font-medium text-amber-800">Finding {{ finding.order }}</span>
+                    </div>
+                    <p class="mt-2 text-sm leading-relaxed text-amber-950">{{ finding.explanation }}</p>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
+                No findings were generated yet.
+              </p>
+            {% endif %}
+          </section>
+
+          <!-- Actions -->
+          <section class="card p-6" aria-labelledby="actions-heading">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 id="actions-heading" class="h3">Recommended actions</h2>
+              <span class="chip-brand">{{ actions|length }} step{{ actions|length|pluralize }}</span>
+            </div>
+
+            {% if actions %}
+              <ol class="mt-5 space-y-3">
+                {% for action in actions %}
+                  <li class="flex items-start gap-3 text-sm leading-relaxed text-slate-700">
+                    <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-600 text-[11px] font-bold text-white" aria-hidden="true">{{ forloop.counter }}</span>
+                    <span>{{ action.text }}</span>
+                  </li>
+                {% endfor %}
+              </ol>
+            {% else %}
+              <p class="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
+                No actions were generated yet.
+              </p>
+            {% endif %}
+          </section>
+
+          <!-- Verification -->
+          <section class="card p-6" aria-labelledby="verification-heading">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 id="verification-heading" class="h3">Verification</h2>
+              {% if verified_evidence %}
+                <span class="chip-ok">{{ verified_evidence|length }} verified</span>
+              {% else %}
+                <span class="chip-neutral">Nothing verified yet</span>
+              {% endif %}
+            </div>
+
+            {% if verified_evidence %}
+              <ul class="mt-5 space-y-2">
+                {% for item in verified_evidence %}
+                  <li class="flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-sm text-emerald-900">
+                    <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white" aria-hidden="true">
+                      <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                    <span><strong>{{ item.label }}:</strong> {{ item.value }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="mt-5 text-sm leading-relaxed text-slate-500">
+                Re-run the checks and mark the evidence as verified to complete the
+                investigation.
+              </p>
+            {% endif %}
+          </section>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="space-y-4 self-start lg:sticky lg:top-24">
+          <div class="card-pad">
+            <p class="eyebrow">Workflow</p>
+            <h2 class="mt-2 text-base font-semibold text-slate-900">{{ workflow.title }}</h2>
+            <dl class="mt-4 space-y-3 text-sm">
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-slate-500">Problem</dt>
+                <dd class="text-right font-medium text-slate-800">{{ problem.name|default:"—" }}</dd>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-slate-500">Version</dt>
+                <dd class="font-medium text-slate-800">{{ session.workflow_version|default:workflow.version }}</dd>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-slate-500">Status</dt>
+                <dd class="font-medium text-slate-800">{{ session.get_status_display }}</dd>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-slate-500">Started</dt>
+                <dd class="font-medium text-slate-800">{{ session.created_at|date:"M j, Y" }}</dd>
+              </div>
+              {% if session.completed_at %}
+                <div class="flex items-center justify-between gap-3">
+                  <dt class="text-slate-500">Completed</dt>
+                  <dd class="font-medium text-slate-800">{{ session.completed_at|date:"M j, Y" }}</dd>
+                </div>
+              {% endif %}
+            </dl>
+          </div>
+
+          <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <p class="text-xs font-semibold text-amber-900">Evidence record</p>
+            <p class="mt-1 text-xs leading-relaxed text-amber-900/80">
+              This report stores what was reported and verified in this session. It does
+              not claim that a fix is complete just because a check changed.
+            </p>
+          </div>
+
+          <div class="card-pad">
+            <p class="text-sm font-semibold text-slate-900">Continue learning</p>
+            <p class="mt-1 text-xs leading-relaxed text-slate-500">
+              Read the related lesson or ask a follow-up question about this result.
+            </p>
+            <div class="mt-3 flex flex-col gap-2">
+              <a href="{% url 'learning' %}" class="btn-secondary btn-sm">Learning roadmap</a>
+              <a href="{% url 'ask' %}" class="btn-secondary btn-sm">Ask KnowGSC</a>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="mt-8">
+        <a href="{% url 'workflows' %}" class="link-arrow"><span aria-hidden="true">←</span> Back to all workflows</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+{% endblock %}

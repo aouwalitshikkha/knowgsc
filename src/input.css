@@ -1,2 +1,376 @@
 @import "tailwindcss";
 @source "../";
+
+/* ============================================================
+   KnowGSC — design tokens
+   ============================================================ */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --color-brand-50: oklch(0.962 0.018 272.314);
+  --color-brand-100: oklch(0.93 0.034 272.788);
+  --color-brand-200: oklch(0.87 0.065 274.039);
+  --color-brand-300: oklch(0.785 0.115 274.713);
+  --color-brand-400: oklch(0.673 0.182 276.935);
+  --color-brand-500: oklch(0.585 0.233 277.117);
+  --color-brand-600: oklch(0.511 0.262 276.966);
+  --color-brand-700: oklch(0.457 0.24 277.023);
+  --color-brand-800: oklch(0.398 0.195 277.366);
+  --color-brand-900: oklch(0.359 0.144 278.697);
+  --color-brand-950: oklch(0.257 0.09 281.288);
+
+  --shadow-soft: 0 1px 2px 0 rgb(15 23 42 / 0.04),
+    0 8px 24px -12px rgb(15 23 42 / 0.12);
+  --shadow-lift: 0 2px 4px -2px rgb(15 23 42 / 0.08),
+    0 18px 36px -18px rgb(15 23 42 / 0.22);
+
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.4s ease both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-600);
+    color: white;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+  }
+
+  /* nicer scrollbars inside scroll areas */
+  .scroll-area {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-slate-300) transparent;
+  }
+  .scroll-area::-webkit-scrollbar {
+    width: 8px;
+  }
+  .scroll-area::-webkit-scrollbar-thumb {
+    background-color: var(--color-slate-300);
+    border-radius: 9999px;
+  }
+
+  /* horizontal rows that scroll without showing a scrollbar */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ============================================================
+   Components
+   ============================================================ */
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .section {
+    @apply py-16 sm:py-20;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-brand-600;
+  }
+
+  .h1 {
+    @apply text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl;
+  }
+
+  .h2 {
+    @apply text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl;
+  }
+
+  .h3 {
+    @apply text-lg font-semibold tracking-tight text-slate-900;
+  }
+
+  .lead {
+    @apply text-base leading-relaxed text-slate-600 sm:text-lg;
+  }
+
+  .muted {
+    @apply text-sm text-slate-500;
+  }
+
+  /* ---------- surfaces ---------- */
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-soft;
+  }
+
+  .card-pad {
+    @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-soft;
+  }
+
+  .card-interactive {
+    @apply transition duration-200 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-lift;
+  }
+
+  /* ---------- buttons ---------- */
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-white,
+  .btn-on-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 text-white shadow-sm hover:bg-brand-500 active:bg-brand-700;
+  }
+
+  .btn-secondary {
+    @apply border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50;
+  }
+
+  .btn-ghost {
+    @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+  }
+
+  .btn-white {
+    @apply bg-white text-brand-700 shadow-sm hover:bg-brand-50;
+  }
+
+  .btn-on-dark {
+    @apply border border-white/30 text-white hover:bg-white/10;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  /* ---------- pills / chips ---------- */
+  .chip,
+  .chip-neutral,
+  .chip-brand,
+  .chip-ok,
+  .chip-warn,
+  .chip-danger {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold;
+  }
+
+  .chip-neutral {
+    @apply bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200;
+  }
+
+  .chip-brand {
+    @apply bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-200;
+  }
+
+  .chip-ok {
+    @apply bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200;
+  }
+
+  .chip-warn {
+    @apply bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200;
+  }
+
+  .chip-danger {
+    @apply bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200;
+  }
+
+  /* ---------- navigation ---------- */
+  .nav-link {
+    @apply rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900;
+  }
+
+  .nav-link-active {
+    @apply bg-brand-50 text-brand-700;
+  }
+
+  .nav-link-mobile {
+    @apply flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100;
+  }
+
+  /* ---------- forms ---------- */
+  .input {
+    @apply w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30;
+  }
+
+  /* ---------- misc ---------- */
+  .link-arrow {
+    @apply inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 transition hover:gap-2.5 hover:text-brand-500;
+  }
+
+  .page-header {
+    @apply border-b border-slate-200 bg-white;
+  }
+
+  .breadcrumb {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 transition hover:text-brand-600;
+  }
+
+  .divider {
+    @apply border-t border-slate-200;
+  }
+
+  .stat-value {
+    @apply mt-1 text-2xl font-bold tracking-tight text-slate-900;
+  }
+
+  /* ---------- CKEditor lesson content ---------- */
+  .lesson-content {
+    @apply text-[15px] leading-7 text-slate-700;
+  }
+
+  .lesson-content > * + * {
+    @apply mt-4;
+  }
+
+  .lesson-content h1 {
+    @apply mt-10 mb-3 text-3xl font-extrabold tracking-tight text-slate-900;
+  }
+
+  .lesson-content h2 {
+    @apply mt-10 mb-3 border-b border-slate-200 pb-2 text-2xl font-bold tracking-tight text-slate-900;
+  }
+
+  .lesson-content h3 {
+    @apply mt-8 mb-2 text-lg font-semibold tracking-tight text-slate-900;
+  }
+
+  .lesson-content h4 {
+    @apply mt-6 mb-2 text-base font-semibold text-slate-900;
+  }
+
+  .lesson-content p {
+    @apply leading-7;
+  }
+
+  .lesson-content strong {
+    @apply font-semibold text-slate-900;
+  }
+
+  .lesson-content a {
+    @apply font-medium text-brand-600 underline decoration-brand-300 underline-offset-2 transition hover:text-brand-500;
+  }
+
+  .lesson-content ul {
+    @apply list-disc space-y-2 pl-6;
+  }
+
+  .lesson-content ol {
+    @apply list-decimal space-y-2 pl-6;
+  }
+
+  .lesson-content li > ul,
+  .lesson-content li > ol {
+    @apply mt-2;
+  }
+
+  .lesson-content blockquote {
+    @apply rounded-r-xl border-l-4 border-brand-400 bg-brand-50/60 px-5 py-4 text-slate-700;
+  }
+
+  .lesson-content blockquote p {
+    @apply m-0;
+  }
+
+  .lesson-content img {
+    @apply my-2 h-auto max-w-full rounded-xl border border-slate-200 shadow-soft;
+  }
+
+  .lesson-content figure {
+    @apply my-7;
+  }
+
+  .lesson-content figure img {
+    @apply my-0 w-full;
+  }
+
+  .lesson-content figcaption {
+    @apply mt-2 text-center text-xs leading-relaxed text-slate-500;
+  }
+
+  .lesson-content table {
+    @apply my-6 w-full border-collapse overflow-hidden rounded-xl text-sm;
+  }
+
+  .lesson-content th {
+    @apply border border-slate-200 bg-slate-50 px-4 py-2.5 text-left font-semibold text-slate-900;
+  }
+
+  .lesson-content td {
+    @apply border border-slate-200 px-4 py-2.5 align-top;
+  }
+
+  .lesson-content code {
+    @apply rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[0.85em] text-slate-800;
+  }
+
+  .lesson-content pre {
+    @apply overflow-x-auto rounded-xl bg-slate-900 p-5 text-sm leading-6 text-slate-100;
+  }
+
+  .lesson-content pre code {
+    @apply bg-transparent p-0 text-inherit;
+  }
+
+  .lesson-content hr {
+    @apply my-8 border-slate-200;
+  }
+
+  .lesson-content iframe {
+    @apply aspect-video w-full rounded-xl border border-slate-200;
+  }
+}
+
+/* ============================================================
+   Utilities
+   ============================================================ */
+@utility bg-grid {
+  background-image: linear-gradient(
+      to right,
+      rgb(15 23 42 / 0.045) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgb(15 23 42 / 0.045) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+@utility text-balance-tight {
+  text-wrap: balance;
+}

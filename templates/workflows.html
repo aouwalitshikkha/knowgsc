@@ -1,134 +1,119 @@
-<!-- ============================================================
 {% extends "base.html" %}
+
+{% block title %}Workflows — Guided GSC troubleshooting | KnowGSC{% endblock %}
+{% block meta_description %}Versioned, branching Google Search Console troubleshooting workflows. Follow a guided investigation from symptom to verified fix.{% endblock %}
+
 {% block content %}
+<main class="min-h-screen">
 
-  KNOWGSC — WORKFLOWS
-  Extends: base.html (shared header / footer / Tailwind shell)
-  Workflow nodes: Start, Question, Condition, Evidence check,
-  Explanation, Action, Resource, Lesson, Finding, Verification, End
-  ============================================================ -->
-
-<main class="min-h-screen bg-gray-50">
-
-  <!-- ================= HEADER ================= -->
-  <section class="border-b border-gray-200 bg-white">
-    <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <a href="/" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">← Back to Home</a>
-          <h1 class="mt-1 text-xl font-bold text-gray-900">Workflows</h1>
-          <p class="text-sm text-gray-500">Versioned, branching diagnostic workflows</p>
+  <!-- Page header -->
+  <section class="page-header">
+    <div class="container-page py-10">
+      <a href="{% url 'home' %}" class="breadcrumb">
+        <span aria-hidden="true">←</span> Back to Home
+      </a>
+      <div class="mt-3 flex flex-wrap items-end justify-between gap-5">
+        <div class="max-w-2xl">
+          <p class="eyebrow">Diagnostic library</p>
+          <h1 class="h1 mt-2 text-3xl sm:text-4xl">Workflows</h1>
+          <p class="lead mt-3">Versioned, branching diagnostic paths — each one turns a vague symptom into a verified fix.</p>
         </div>
-        <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800 ring-1 ring-inset ring-indigo-200">
-          Admin: publish versioned workflows
-        </span>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="chip-brand">{{ published_count }} published</span>
+          <span class="chip-neutral">Admin: publish versioned workflows</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ================= WORKFLOW LIST ================= -->
-  <section class="py-8 sm:py-12">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex items-end justify-between gap-4">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900">Troubleshooting Workflows</h2>
-          <p class="mt-1 text-sm text-gray-600">Start a guided investigation for a known GSC problem.</p>
+  <!-- Filter + list -->
+  <section class="section">
+    <div class="container-page">
+
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter workflows">
+          <button type="button" class="workflow-filter btn-primary btn-sm" data-filter="all">All</button>
+          {% for category in categories %}
+            <button type="button" class="workflow-filter btn-secondary btn-sm" data-filter="{{ category.slug }}">
+              {{ category.name }}
+            </button>
+          {% endfor %}
         </div>
-        <span class="rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-gray-300">
-          6 published workflows
-        </span>
+        <p class="text-xs text-slate-500">Every workflow records evidence before it recommends a fix.</p>
       </div>
 
-      <div class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div id="workflow-grid" class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
 
-        <!-- Workflow card: Discovered – currently not indexed -->
-        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">Indexing</span>
-              <h3 class="mt-3 text-lg font-bold text-gray-900">Discovered – currently not indexed</h3>
-              <p class="mt-1 text-sm text-gray-600">Problem: Discovered – currently not indexed</p>
+        {% for workflow in workflows %}
+          <article class="workflow-card card-pad card-interactive" data-category="{{ workflow.problem.category.slug }}">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <span class="{{ workflow.problem.category.chip_class }}">{{ workflow.problem.category.name }}</span>
+                <h2 class="mt-3 text-lg font-semibold text-slate-900">{{ workflow.title }}</h2>
+                <p class="mt-1 text-sm text-slate-500">{{ workflow.problem.summary }}</p>
+              </div>
+              <span class="chip-ok">{{ workflow.published_label }}</span>
             </div>
-            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-200">Published · v1.0</span>
-          </div>
 
-          <p class="mt-3 text-sm text-gray-600">
-            Confirms GSC status → checks sitemap inclusion → validates internal links → checks HTTP response → collects evidence → generates findings.
-          </p>
+            <p class="mt-4 text-sm leading-relaxed text-slate-600">{{ workflow.summary }}</p>
 
-          <div class="mt-4 flex flex-wrap gap-2">
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Start</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Question</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Condition</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Evidence check</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Finding</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Verification</span>
-          </div>
-
-          <a href="/problem-solver?problem=discovered"
-             class="mt-5 inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">
-            Start diagnostic session →
-          </a>
-        </div>
-
-        <!-- Workflow card: Crawled – currently not indexed -->
-        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">Indexing</span>
-              <h3 class="mt-3 text-lg font-bold text-gray-900">Crawled – currently not indexed</h3>
-              <p class="mt-1 text-sm text-gray-600">Problem: Crawled – currently not indexed</p>
+            <div class="mt-4 flex flex-wrap gap-1.5">
+              {% for kind in workflow.node_kinds %}
+                <span class="chip-neutral">{{ kind }}</span>
+              {% endfor %}
             </div>
-            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-200">Published · v1.0</span>
-          </div>
 
-          <p class="mt-3 text-sm text-gray-600">
-            Confirms GSC status → checks crawl eligibility → validates directives → inspects canonicals → collects evidence → generates findings.
-          </p>
+            <a href="{{ workflow.get_absolute_url }}" class="btn-primary mt-6">
+              Open workflow
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+              </svg>
+            </a>
+          </article>
+        {% empty %}
+          <p class="text-sm text-slate-500">No workflows have been published yet.</p>
+        {% endfor %}
 
-          <div class="mt-4 flex flex-wrap gap-2">
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Start</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Question</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Condition</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Finding</span>
-          </div>
-
-          <a href="/problem-solver?problem=crawled" class="mt-5 inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">
-            Start diagnostic session →
-          </a>
-        </div>
-
-        <!-- Workflow card: Server error (5xx) -->
-        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <span class="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-800">Crawling &amp; Server</span>
-              <h3 class="mt-3 text-lg font-bold text-gray-900">Server error (5xx)</h3>
-              <p class="mt-1 text-sm text-gray-600">Problem: Server error (5xx)</p>
-            </div>
-            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-200">Published · v1.0</span>
-          </div>
-
-          <p class="mt-3 text-sm text-gray-600">
-            Checks timeout reproducibility → reviews proxy &amp; application logs → validates server stability → recommends fixes.
-          </p>
-
-          <div class="mt-4 flex flex-wrap gap-2">
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Start</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Question</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Action</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Finding</span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-inset ring-gray-200">Verification</span>
-          </div>
-
-          <a href="/problem-solver?problem=server-error" class="mt-5 inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">
-            Start diagnostic session →
-          </a>
-        </div>
       </div>
+
+      <p id="workflow-empty" class="hidden mt-10 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-sm text-slate-500">
+        No workflows match this filter yet.
+      </p>
+
     </div>
   </section>
 
 </main>
 
+<script>
+  (function () {
+    const filters = document.querySelectorAll('.workflow-filter');
+    const cards = document.querySelectorAll('.workflow-card');
+    const empty = document.getElementById('workflow-empty');
+
+    const primary = ['btn-primary', 'btn-secondary'];
+
+    filters.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+
+        filters.forEach((b) => {
+          const isActive = b === btn;
+          b.classList.remove(...primary);
+          b.classList.add(isActive ? 'btn-primary' : 'btn-secondary');
+          b.setAttribute('aria-pressed', String(isActive));
+        });
+
+        let visible = 0;
+        cards.forEach((card) => {
+          const match = filter === 'all' || card.dataset.category === filter;
+          card.classList.toggle('hidden', !match);
+          if (match) visible += 1;
+        });
+
+        empty.classList.toggle('hidden', visible > 0);
+      });
+    });
+  })();
+</script>
 {% endblock %}

@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}{{ scenario.title }} — Practice Lab | KnowGSC{% endblock %}
+{% block meta_description %}{{ scenario.summary }} Practise this simulated Google Search Console scenario and compare your findings with the worked solution.{% endblock %}
+
+{% block content %}
+<main class="min-h-screen">
+
+  <!-- Scenario header -->
+  <section class="page-header">
+    <div class="container-page py-8">
+      <nav class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-slate-400" aria-label="Breadcrumb">
+        <a href="{% url 'practice_lab' %}" class="breadcrumb">Practice Lab</a>
+        <span aria-hidden="true">/</span>
+        <span class="truncate text-slate-600" aria-current="page">{{ scenario.title }}</span>
+      </nav>
+
+      <div class="mt-5 flex flex-wrap items-start justify-between gap-5">
+        <div class="max-w-3xl">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="{{ scenario.chip_class }}">{{ scenario.category_label }}</span>
+            <span class="chip-warn">Simulated data</span>
+            <span class="chip-neutral">{{ scenario.issue }}</span>
+          </div>
+          <h1 class="h1 mt-3 text-3xl sm:text-4xl">{{ scenario.title }}</h1>
+          <p class="lead mt-3">{{ scenario.summary }}</p>
+        </div>
+        <div class="flex shrink-0 gap-2">
+          <a href="{% url 'practice_lab' %}" class="btn-secondary">
+            <span aria-hidden="true">←</span> All scenarios
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-10 pb-16">
+    <div class="container-page">
+
+      {% if scenario.description %}
+        <div class="card-pad">
+          <p class="eyebrow">Scenario briefing</p>
+          <p class="mt-3 max-w-4xl text-sm leading-relaxed text-slate-700 sm:text-base">{{ scenario.description }}</p>
+        </div>
+      {% endif %}
+
+      <!-- Simulated GSC interface -->
+      <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+
+        <!-- Panel header -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-3.5">
+          <div class="flex items-center gap-2.5">
+            <span class="flex h-7 w-7 items-center justify-center rounded-md bg-white text-[11px] font-bold text-brand-600 ring-1 ring-slate-200">GSC</span>
+            <p class="text-sm font-semibold text-slate-900">{{ scenario.report_title }}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="chip-warn">Simulated data</span>
+            <span class="chip-neutral">{{ scenario.issue }}</span>
+          </div>
+        </div>
+
+        <div class="space-y-8 p-5 sm:p-6">
+
+          <!-- Key metrics -->
+          <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {% for metric in scenario.metrics %}
+              <div class="rounded-xl border border-slate-200 p-4">
+                <div class="flex items-center justify-between">
+                  <p class="text-xs font-medium text-slate-500">{{ metric.label }}</p>
+                  <span class="text-[10px] font-semibold {% if metric.tone == 'ok' %}text-emerald-600{% elif metric.tone == 'danger' %}text-rose-600{% else %}text-amber-600{% endif %}">{{ metric.delta }}</span>
+                </div>
+                <p class="stat-value {% if metric.tone == 'warn' %}text-amber-600{% elif metric.tone == 'danger' %}text-rose-600{% endif %}">{{ metric.value }}</p>
+                <p class="mt-0.5 text-xs text-slate-400">{{ metric.note }}</p>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- URL inspection table -->
+          <div>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h2 class="h3 text-base">Example URLs &amp; URL Inspection results</h2>
+              <span class="text-xs text-slate-400">Fictional URLs</span>
+            </div>
+
+            <div class="mt-3 overflow-x-auto rounded-xl border border-slate-200">
+              <table class="w-full min-w-[760px] text-left text-sm">
+                <thead class="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th scope="col" class="px-4 py-2.5 font-semibold">URL</th>
+                    <th scope="col" class="px-4 py-2.5 font-semibold">Final URL</th>
+                    <th scope="col" class="px-4 py-2.5 font-semibold">Indexability</th>
+                    <th scope="col" class="px-4 py-2.5 font-semibold">Crawlability</th>
+                    <th scope="col" class="px-4 py-2.5 font-semibold">Page state</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                  {% for row in scenario.urls %}
+                    <tr class="transition hover:bg-slate-50/70">
+                      <td class="px-4 py-2.5 font-mono text-xs">{{ row.url }}</td>
+                      <td class="px-4 py-2.5 font-mono text-xs text-slate-500">{{ row.final_url }}</td>
+                      <td class="px-4 py-2.5"><span class="chip-{{ row.indexability_tone }}">{{ row.indexability }}</span></td>
+                      <td class="px-4 py-2.5 text-xs">{{ row.crawlability }}</td>
+                      <td class="px-4 py-2.5 text-xs text-slate-500">{{ row.state }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Summary cards -->
+          <div class="grid gap-4 md:grid-cols-2">
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="flex items-center justify-between">
+                <h2 class="text-sm font-semibold text-slate-900">Sitemap report</h2>
+                <span class="chip-{{ scenario.sitemap.tone }}">{{ scenario.sitemap.status }}</span>
+              </div>
+              <dl class="mt-3 grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <dt class="text-[11px] text-slate-500">Submitted</dt>
+                  <dd class="mt-0.5 text-sm font-semibold text-slate-900">{{ scenario.sitemap.submitted }}</dd>
+                </div>
+                <div>
+                  <dt class="text-[11px] text-slate-500">Excluded</dt>
+                  <dd class="mt-0.5 text-sm font-semibold text-slate-900">{{ scenario.sitemap.excluded }}</dd>
+                </div>
+                <div>
+                  <dt class="text-[11px] text-slate-500">Errors</dt>
+                  <dd class="mt-0.5 text-sm font-semibold text-rose-600">{{ scenario.sitemap.errors }}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="flex items-center justify-between">
+                <h2 class="text-sm font-semibold text-slate-900">Page experience</h2>
+                <span class="chip-{{ scenario.page_experience.tone }}">{{ scenario.page_experience.status }}</span>
+              </div>
+              <dl class="mt-3 grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <dt class="text-[11px] text-slate-500">LCP</dt>
+                  <dd class="mt-0.5 text-sm font-semibold {% if scenario.page_experience.lcp_tone == 'warn' %}text-amber-600{% elif scenario.page_experience.lcp_tone == 'danger' %}text-rose-600{% else %}text-emerald-600{% endif %}">{{ scenario.page_experience.lcp }}</dd>
+                </div>
+                <div>
+                  <dt class="text-[11px] text-slate-500">INP</dt>
+                  <dd class="mt-0.5 text-sm font-semibold text-slate-900">{{ scenario.page_experience.inp }}</dd>
+                </div>
+                <div>
+                  <dt class="text-[11px] text-slate-500">CLS</dt>
+                  <dd class="mt-0.5 text-sm font-semibold text-slate-900">{{ scenario.page_experience.cls }}</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Investigation checklist and findings -->
+      <div class="mt-8 grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+        <div class="card-pad">
+          <h2 class="h3">Investigation checklist</h2>
+          <p class="mt-1 text-sm text-slate-500">Tick each step you completed in this scenario.</p>
+
+          <div class="mt-5 space-y-2">
+            {% for item in scenario.checklist %}
+              <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3.5 transition hover:border-brand-300 hover:bg-brand-50/40">
+                <input type="checkbox" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+                <span class="text-sm text-slate-700">{{ item }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card-pad flex flex-col">
+          <h2 class="h3">Your findings</h2>
+          <p class="mt-1 text-sm text-slate-500">Write down the likely cause before you check the answer.</p>
+
+          <label for="findings" class="sr-only">Your findings</label>
+          <textarea id="findings" rows="4" placeholder="e.g. The sitemap lists the URL, but it has no internal links and returns a slow 504…"
+                    class="input mt-4 flex-1 resize-none"></textarea>
+
+          <div class="mt-4 flex flex-wrap gap-2">
+            {% if scenario.problem %}
+              <a href="{{ scenario.problem.get_absolute_url }}" class="btn-primary">
+                Run the workflow
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+                </svg>
+              </a>
+            {% else %}
+              <a href="{% url 'problem_solver' %}" class="btn-primary">
+                Run the workflow
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+                </svg>
+              </a>
+            {% endif %}
+            <button type="button" id="reveal-answer" class="btn-secondary">Reveal likely cause</button>
+          </div>
+
+          <p id="answer" class="mt-4 hidden rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-sm leading-relaxed text-emerald-900">
+            <strong>Likely cause:</strong> <span>{{ scenario.expected_cause }}</span>
+          </p>
+
+          <a href="#solution" class="link-arrow mt-4">Jump to the worked solution <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+
+      <!-- Worked solution -->
+      <section id="solution" class="mt-8 scroll-mt-24" aria-labelledby="solution-heading">
+        <div class="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-soft">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-200 bg-emerald-50 px-5 py-3.5 sm:px-6">
+            <div class="flex items-center gap-2.5">
+              <span class="flex h-7 w-7 items-center justify-center rounded-md bg-white text-emerald-600 ring-1 ring-emerald-200" aria-hidden="true">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+              <h2 id="solution-heading" class="h3">Worked solution</h2>
+            </div>
+            <span class="chip-ok">Worked answer</span>
+          </div>
+
+          <div class="grid gap-6 p-5 sm:p-6 lg:grid-cols-[1.15fr_1fr]">
+            <div>
+              <p class="eyebrow text-emerald-700">Likely cause</p>
+              <p class="mt-2 text-sm leading-relaxed text-slate-700">{{ scenario.expected_cause }}</p>
+
+              {% if scenario.solution %}
+                <p class="eyebrow mt-6 text-emerald-700">How to fix it</p>
+                <p class="mt-2 text-sm leading-relaxed text-slate-700">{{ scenario.solution }}</p>
+              {% endif %}
+            </div>
+
+            {% if scenario.solution_steps %}
+              <div class="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 sm:p-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Fix steps</p>
+                <ol class="mt-3 space-y-3">
+                  {% for step in scenario.solution_steps %}
+                    <li class="flex items-start gap-3 text-sm leading-relaxed text-slate-700">
+                      <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[11px] font-bold text-white" aria-hidden="true">{{ forloop.counter }}</span>
+                      <span>{{ step }}</span>
+                    </li>
+                  {% endfor %}
+                </ol>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <!-- Next steps -->
+      <div class="mt-8 flex flex-col items-start justify-between gap-4 rounded-2xl border border-brand-200 bg-brand-50/60 p-6 sm:flex-row sm:items-center">
+        <div>
+          <p class="text-sm font-semibold text-slate-900">Practise the full diagnosis</p>
+          <p class="mt-1 text-sm text-slate-600">Run the guided workflow and apply the same checks to your own Search Console property.</p>
+        </div>
+        {% if scenario.problem %}
+          <a href="{{ scenario.problem.get_absolute_url }}" class="btn-primary shrink-0">
+            Open workflow
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+            </svg>
+          </a>
+        {% else %}
+          <a href="{% url 'problem_solver' %}" class="btn-primary shrink-0">
+            Open workflow
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+            </svg>
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- Previous / next scenario -->
+      <nav class="mt-8 grid gap-3 sm:grid-cols-2" aria-label="Scenario navigation">
+        {% if previous_scenario %}
+          <a href="{{ previous_scenario.get_absolute_url }}" class="group card-pad flex flex-col transition hover:border-brand-300 hover:shadow-lift">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">← Previous scenario</span>
+            <span class="mt-1 text-sm font-semibold text-slate-900 group-hover:text-brand-700">{{ previous_scenario.title }}</span>
+          </a>
+        {% else %}
+          <span class="hidden sm:block" aria-hidden="true"></span>
+        {% endif %}
+
+        {% if next_scenario %}
+          <a href="{{ next_scenario.get_absolute_url }}" class="group card-pad flex flex-col text-right transition hover:border-brand-300 hover:shadow-lift">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Next scenario →</span>
+            <span class="mt-1 text-sm font-semibold text-slate-900 group-hover:text-brand-700">{{ next_scenario.title }}</span>
+          </a>
+        {% endif %}
+      </nav>
+
+      <div class="mt-6">
+        <a href="{% url 'practice_lab' %}" class="link-arrow"><span aria-hidden="true">←</span> Back to all practice scenarios</a>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<script>
+  (function () {
+    const reveal = document.getElementById('reveal-answer');
+    const answer = document.getElementById('answer');
+    if (!reveal || !answer) return;
+
+    reveal.addEventListener('click', () => {
+      const hidden = answer.classList.toggle('hidden');
+      reveal.textContent = hidden ? 'Reveal likely cause' : 'Hide likely cause';
+    });
+  })();
+</script>
+{% endblock %}
